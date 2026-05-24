@@ -1,0 +1,46 @@
+dataset_name: DataPCB_Final_Clean_6cls
+environment: kaggle
+
+raw_input_root: /kaggle/input/datasets/chungkein/datapcb-project
+processed_root: /kaggle/working/datapcb_final_clean_6cls/DataPCB_Final_Clean_6cls
+data_yaml: /kaggle/working/datapcb_final_clean_6cls/DataPCB_Final_Clean_6cls/data.yaml
+
+num_classes: 6
+classes:
+  - missing_hole
+  - mouse_bite
+  - open_circuit
+  - short
+  - spur
+  - spurious_copper
+
+preprocessing_policy:
+  DeepPCB:
+    action: map_to_6_classes
+  HRIPCB:
+    action: map_to_6_classes
+  DsPCBSD:
+    action: map_to_6_classes_and_remove_ignored_boxes
+    mapped_classes:
+      HB: missing_hole
+      MB: mouse_bite
+      OP: open_circuit
+      SH: short
+      SP: spur
+      SC: spurious_copper
+    removed_classes:
+      - CS
+      - CFO
+      - BMFO
+    drop_empty_images_after_removal: true
+    keep_spur_only_images: true
+
+split_policy:
+  preserve_original_splits: true
+  merge_by_split: true
+
+balancing_policy:
+  hard_balancing: false
+  downsampling: false
+  oversampling: false
+  offline_crop_augmentation: false

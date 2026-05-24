@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data
+data/raw/
+data/processed/
+*.zip
+*.tar
+*.tar.gz
+*.rar
+
+# Weights
+weights/*
+!weights/README.md
+*.pt
+*.pth
+*.onnx
+*.engine
+*.ckpt
+
+# Training outputs
+runs/*
+!runs/README.md
+wandb/
+mlruns/
+
+# Logs
+*.log
