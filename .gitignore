@@ -4,6 +4,7 @@ __pycache__/
 *.pyo
 .pytest_cache/
 .mypy_cache/
+.ruff_cache/
 
 # Jupyter
 .ipynb_checkpoints/
@@ -25,9 +26,8 @@ data/processed/
 *.tar.gz
 *.rar
 
-# Weights
-weights/*
-!weights/README.md
+# Model weights and checkpoints
+weights/
 *.pt
 *.pth
 *.onnx
@@ -35,10 +35,18 @@ weights/*
 *.ckpt
 
 # Training outputs
-runs/*
-!runs/README.md
+runs/
 wandb/
 mlruns/
 
+# Kaggle artifacts
+*_artifacts/
+*_artifacts.zip
+kaggle/working/
+
 # Logs
 *.log
+
+# Temporary inspection files
+project_structure_clean.txt
+project_structure_no_images.txt

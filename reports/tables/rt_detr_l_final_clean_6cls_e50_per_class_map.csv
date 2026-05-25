@@ -1,7 +1,0 @@
-class_id,class_name,mAP50_95_per_class,experiment,model_name
-0,missing_hole,0.857011077910086,rt_detr_l_final_clean_6cls_e50,rtdetr-l.pt
-1,mouse_bite,0.5822736531816082,rt_detr_l_final_clean_6cls_e50,rtdetr-l.pt
-2,open_circuit,0.6505488638873704,rt_detr_l_final_clean_6cls_e50,rtdetr-l.pt
-3,short,0.6352210511823808,rt_detr_l_final_clean_6cls_e50,rtdetr-l.pt
-4,spur,0.4814404591165542,rt_detr_l_final_clean_6cls_e50,rtdetr-l.pt
-5,spurious_copper,0.7296171299031154,rt_detr_l_final_clean_6cls_e50,rtdetr-l.pt
