@@ -1,0 +1,2 @@
+experiment,model_name,weights,precision,recall,mAP50,mAP50_95
+rt_detr_l_final_clean_6cls_e50,rtdetr-l.pt,/kaggle/working/runs/detect/PCB_Baseline/rt_detr_l_final_clean_6cls_e50/weights/best.pt,0.9159330176470588,0.8922227727665991,0.9282569149037306,0.6560187058635191
