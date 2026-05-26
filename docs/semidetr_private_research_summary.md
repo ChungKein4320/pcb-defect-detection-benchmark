@@ -205,7 +205,7 @@ Only sanitized code notebooks and this technical summary should be committed.
 
 Add this section to the main `README.md`:
 
-```md
+````md
 ## Additional Semi-DETR Research
 
 I also studied a Semi-DETR-style semi-supervised object detection pipeline on a private academic PCB defect dataset.
@@ -231,7 +231,7 @@ A technical summary is available at:
 ```text
 docs/semidetr_private_research_summary.md
 ```
-```
+````
 
 ## Commit checklist
 
