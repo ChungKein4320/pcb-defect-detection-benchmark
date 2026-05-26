@@ -1,0 +1,5 @@
+experiment,model_name,test_source,weights,precision,recall,f1,mAP50,mAP50_95,inference_ms_per_image,FPS
+yolov11s_final_clean_6cls_e50,yolo11s.pt,Merged,/kaggle/working/runs/detect/PCB_Baseline/yolov11s_final_clean_6cls_e50/weights/best.pt,0.8529388719564975,0.8053314084618806,0.8284517562617244,0.878770209530274,0.5760897755750776,11.014335777955617,90.79076761046512
+yolov11s_final_clean_6cls_e50,yolo11s.pt,DeepPCB,/kaggle/working/runs/detect/PCB_Baseline/yolov11s_final_clean_6cls_e50/weights/best.pt,0.9497089428267963,0.9378508563968081,0.9437426519935178,0.974986519217414,0.7538068041542451,11.533546180000181,86.70360220467633
+yolov11s_final_clean_6cls_e50,yolo11s.pt,DsPCBSD,/kaggle/working/runs/detect/PCB_Baseline/yolov11s_final_clean_6cls_e50/weights/best.pt,0.7977081072656874,0.7516444009542539,0.7739914954679287,0.8299910083928362,0.48743634995643514,12.37505135566498,80.80774545975729
+yolov11s_final_clean_6cls_e50,yolo11s.pt,HRIPCB,/kaggle/working/runs/detect/PCB_Baseline/yolov11s_final_clean_6cls_e50/weights/best.pt,0.8048332253081689,0.6735835966240155,0.7333824271250757,0.7233050822253716,0.3060150214533408,12.057769323739926,82.93407952589963

@@ -34,3 +34,7 @@ DataPCB\_Final\_Clean\_6cls
 
 \- Faster R-CNN ResNet50-FPN
 
+\- YOLOv11s-CBAMLite-BiFPNLite-P2
+
+\- PCBNet-RTDETR-HybridOpt
+

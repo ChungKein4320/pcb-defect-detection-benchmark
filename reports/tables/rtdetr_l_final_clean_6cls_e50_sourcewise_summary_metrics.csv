@@ -1,0 +1,5 @@
+experiment,model_name,test_source,weights,precision,recall,f1,mAP50,mAP50_95,inference_ms_per_image,FPS
+rtdetr_l_final_clean_6cls_e50,rtdetr-l.pt,Merged,/kaggle/working/runs/detect/PCB_Baseline/rtdetr_l_final_clean_6cls_e50/weights/best.pt,0.9214669721663293,0.8969600866247197,0.9090483901241839,0.9315007338439738,0.6595393808522694,42.115563369897195,23.74419145761129
+rtdetr_l_final_clean_6cls_e50,rtdetr-l.pt,DeepPCB,/kaggle/working/runs/detect/PCB_Baseline/rtdetr_l_final_clean_6cls_e50/weights/best.pt,0.9875493382781699,0.9704848230063424,0.9789427209382172,0.9862432756846014,0.8345332551021322,40.6316638166633,24.611347556727267
+rtdetr_l_final_clean_6cls_e50,rtdetr-l.pt,DsPCBSD,/kaggle/working/runs/detect/PCB_Baseline/rtdetr_l_final_clean_6cls_e50/weights/best.pt,0.8593753303311046,0.8404095013224723,0.8497866075317365,0.8698578032757478,0.5398716398959944,42.598750827349534,23.47486676435529
+rtdetr_l_final_clean_6cls_e50,rtdetr-l.pt,HRIPCB,/kaggle/working/runs/detect/PCB_Baseline/rtdetr_l_final_clean_6cls_e50/weights/best.pt,0.9742011449046973,0.9506984451298471,0.9623063130144794,0.9613453730615253,0.5197743240553158,40.14387218704679,24.910402149064975
