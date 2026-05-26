@@ -46,6 +46,39 @@ HRIPCB
 
 The final processed dataset standardizes class names and label ids across sources, removes unsupported DsPCBSD classes, and keeps a consistent YOLO detection format.
 
+### Data Access
+
+Dataset archives are not committed to this repository because they are large.
+
+The public dataset archives can be downloaded from:
+
+```text
+https://drive.google.com/drive/folders/1HgYeXju6ztRux0FNicaaQ8CKoi9qTl5g?usp=sharing
+```
+
+The Google Drive folder contains four `.zip` files:
+
+```text
+DsPCBSD+.zip
+HRIPCB.zip
+DeepPCB.zip
+DataPCB_Final_Clean_6cls.zip
+```
+
+For the expected local directory structure and extraction notes, see:
+
+```text
+docs/data_sources.md
+```
+
+The final benchmark uses:
+
+```text
+data/processed/DataPCB_Final_Clean_6cls/
+```
+
+Dataset files are excluded from GitHub through `.gitignore`.
+
 ### Final Class Set
 
 | ID | Class |
@@ -332,6 +365,7 @@ pcb-defect-detection-benchmark/
 ├── data/
 │   └── README.md
 ├── docs/
+│   ├── data_sources.md
 │   ├── experiment_log.md
 │   ├── kaggle_links.md
 │   └── semidetr_private_research_summary.md
@@ -419,7 +453,23 @@ before training. This avoids read-only cache issues from `/kaggle/input`.
 
 ## How to Run
 
-### 1. Prepare the dataset
+### 1. Download the dataset archives
+
+Download the dataset archives from:
+
+```text
+https://drive.google.com/drive/folders/1HgYeXju6ztRux0FNicaaQ8CKoi9qTl5g?usp=sharing
+```
+
+See:
+
+```text
+docs/data_sources.md
+```
+
+for the expected local structure.
+
+### 2. Prepare the dataset
 
 Run:
 
@@ -429,7 +479,7 @@ notebooks/01_prepare_final_datapcb_clean_6cls.ipynb
 
 This creates the cleaned 6-class dataset.
 
-### 2. Train the main benchmark models
+### 3. Train the main benchmark models
 
 Run the training notebooks:
 
@@ -443,7 +493,7 @@ notebooks/06_train_pcbnet_rtdetr_hybridopt_datapcb_clean_6cls_sourcewise.ipynb
 
 Each training notebook exports source-wise result CSV files.
 
-### 3. Collect result CSV/PNG files
+### 4. Collect result CSV/PNG files
 
 Download the small result files from Kaggle output and place them in:
 
@@ -454,7 +504,7 @@ reports/figures/
 
 Do not commit weights, checkpoints, or full run folders.
 
-### 4. Generate the benchmark summary
+### 5. Generate the benchmark summary
 
 Run:
 
@@ -468,7 +518,7 @@ This generates final comparison tables, figures, and a README helper file:
 reports/benchmark_readme_summary.md
 ```
 
-### 5. Review the Semi-DETR research summary
+### 6. Review the Semi-DETR research summary
 
 Open:
 

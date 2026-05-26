@@ -1,0 +1,14 @@
+numpy
+pandas
+matplotlib
+opencv-python
+pyyaml
+tqdm
+scikit-learn
+torch
+torchvision
+torchmetrics
+ultralytics
+pycocotools
+transformers
+Pillow

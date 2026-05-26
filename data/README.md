@@ -1,46 +1,88 @@
 # Data
 
-This folder is used only for local storage and is not committed to GitHub.
+This folder is used for local dataset storage only. Dataset files are not committed to GitHub.
 
-## Raw datasets
+## Download
 
-Expected local structure:
+Dataset archives are available from the Google Drive folder below:
 
-- data/raw/datapcb-project/DeepPCB/
-- data/raw/datapcb-project/DsPCBSD/
-- data/raw/datapcb-project/HRIPCB/
+```text
+https://drive.google.com/drive/folders/1HgYeXju6ztRux0FNicaaQ8CKoi9qTl5g?usp=sharing
+```
 
-Original archives can be stored locally at:
+See the detailed data source guide:
 
-- data/raw/archives/DeepPCB.zip
-- data/raw/archives/DsPCBSD+.zip
-- data/raw/archives/HRIPCB.zip
+```text
+docs/data_sources.md
+```
 
-## Processed dataset
+## Included Archives
 
-Final processed dataset:
+The Google Drive folder contains four `.zip` files:
 
-- data/processed/DataPCB_Final_Clean_6cls/train/
-- data/processed/DataPCB_Final_Clean_6cls/valid/
-- data/processed/DataPCB_Final_Clean_6cls/test/
-- data/processed/DataPCB_Final_Clean_6cls/data.yaml
+```text
+DsPCBSD+.zip
+HRIPCB.zip
+DeepPCB.zip
+DataPCB_Final_Clean_6cls.zip
+```
 
-Processed archive can be stored locally at:
+## Expected Local Structure
 
-- data/processed/archives/DataPCB_Final_Clean_6cls.zip
+```text
+data/
+├── raw/
+│   ├── archives/
+│   │   ├── DsPCBSD+.zip
+│   │   ├── HRIPCB.zip
+│   │   └── DeepPCB.zip
+│   └── datapcb-project/
+│       ├── DeepPCB/
+│       ├── DsPCBSD/
+│       └── HRIPCB/
+└── processed/
+    ├── archives/
+    │   └── DataPCB_Final_Clean_6cls.zip
+    └── DataPCB_Final_Clean_6cls/
+        ├── train/
+        ├── valid/
+        ├── test/
+        └── data.yaml
+```
 
-## Training environment
+## Folder Meaning
 
-All training is performed on Kaggle.
+```text
+data/raw/
+```
 
-Local data is kept only for backup, inspection, and project organization.
+Stores the original source datasets.
 
-Kaggle raw dataset path:
+```text
+data/processed/
+```
 
-- /kaggle/input/datasets/chungkein/datapcb-project
+Stores the final cleaned dataset used by the benchmark.
 
-Final processed dataset path on Kaggle:
+The main benchmark dataset is:
 
-- /kaggle/working/datapcb_final_clean_6cls/DataPCB_Final_Clean_6cls
+```text
+data/processed/DataPCB_Final_Clean_6cls/
+```
 
-Dataset files are excluded from Git via `.gitignore`.
+## Git Policy
+
+The following folders are excluded from Git:
+
+```text
+data/raw/
+data/processed/
+```
+
+Only this `README.md` file is committed to document the expected data layout.
+
+## Training Environment
+
+Training is performed on Kaggle. Local data is used only for backup, inspection, and project organization.
+
+Full datasets, processed outputs, training runs, and weights are not committed to this repository.
