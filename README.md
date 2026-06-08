@@ -1,38 +1,30 @@
 # PCB Defect Detection Benchmark
 
-A source-wise benchmark for printed circuit board (PCB) defect detection using a cleaned 6-class merged dataset, multiple object detection families, and an additional public-safe Semi-DETR research summary.
+A source-wise benchmark for printed circuit board (PCB) defect detection using a cleaned 6-class merged dataset and multiple object detection families.
 
-This project focuses on four goals:
+This project focuses on building a reproducible PCB defect detection benchmark, comparing one-stage, two-stage, and transformer-based detectors, and analyzing model robustness across different PCB dataset sources.
 
-1. Build a clean and consistent 6-class PCB defect dataset.
-2. Benchmark multiple detector families under the same data protocol.
-3. Analyze whether weak performance comes from model choice, class difficulty, or dataset-source/domain differences.
-4. Document additional Semi-DETR-style semi-supervised detection research while respecting private-data confidentiality.
+## Highlights
 
----
+* Built a cleaned 6-class PCB defect dataset from DeepPCB, DsPCBSD, and HRIPCB.
+* Standardized class names, label IDs, and YOLO detection format across multiple dataset sources.
+* Benchmarked YOLOv11s, RT-DETR-L, Faster R-CNN ResNet50-FPN, YOLOv11s-CBAMLite-BiFPNLite-P2, and PCBNet-RTDETR-HybridOpt.
+* Evaluated models on merged and source-specific test sets to analyze domain robustness.
+* Best merged-test model: RT-DETR-L with `0.9315 mAP50` and `0.6595 mAP50-95`.
+* Fastest practical baseline: YOLOv11s with `90.79 FPS`.
+* Added result tables, figures, source-wise evaluation, and a public-safe Semi-DETR research summary.
 
-## Overview
+## Problem Statement
 
-PCB defect detection is challenging because defects are often small, low-contrast, and visually similar to normal copper traces or neighboring defect categories. This project evaluates multiple detection approaches on a merged PCB dataset and reports both merged-test performance and source-wise performance.
+PCB defect detection is difficult because many defects are:
 
-The final dataset is named:
+* small
+* low-contrast
+* visually similar to normal copper traces
+* visually similar to neighboring defect classes
+* unevenly distributed across dataset sources
 
-```text
-DataPCB_Final_Clean_6cls
-```
-
-The six target classes are:
-
-```text
-missing_hole
-mouse_bite
-open_circuit
-short
-spur
-spurious_copper
-```
-
----
+A single merged-test score can hide source-specific failure cases. Therefore, this project evaluates each detector on both the merged test set and individual source-specific test sets.
 
 ## Dataset
 
@@ -44,7 +36,19 @@ DsPCBSD
 HRIPCB
 ```
 
-The final processed dataset standardizes class names and label ids across sources, removes unsupported DsPCBSD classes, and keeps a consistent YOLO detection format.
+The final processed dataset is:
+
+```text
+DataPCB_Final_Clean_6cls
+```
+
+The final benchmark dataset uses a consistent YOLO detection format:
+
+```text
+data/processed/DataPCB_Final_Clean_6cls/
+```
+
+Dataset files are excluded from GitHub through `.gitignore`.
 
 ### Data Access
 
@@ -56,7 +60,7 @@ The public dataset archives can be downloaded from:
 https://drive.google.com/drive/folders/1HgYeXju6ztRux0FNicaaQ8CKoi9qTl5g?usp=sharing
 ```
 
-The Google Drive folder contains four `.zip` files:
+The Google Drive folder contains:
 
 ```text
 DsPCBSD+.zip
@@ -65,44 +69,34 @@ DeepPCB.zip
 DataPCB_Final_Clean_6cls.zip
 ```
 
-For the expected local directory structure and extraction notes, see:
+For expected local directory structure and extraction notes, see:
 
 ```text
-docs/data_sources.md
+docs/docs_data_sources.md
 ```
 
-The final benchmark uses:
+## Final Class Set
 
-```text
-data/processed/DataPCB_Final_Clean_6cls/
-```
+| ID | Class           |
+| -: | --------------- |
+|  0 | missing_hole    |
+|  1 | mouse_bite      |
+|  2 | open_circuit    |
+|  3 | short           |
+|  4 | spur            |
+|  5 | spurious_copper |
 
-Dataset files are excluded from GitHub through `.gitignore`.
-
-### Final Class Set
-
-| ID | Class |
-|---:|---|
-| 0 | missing_hole |
-| 1 | mouse_bite |
-| 2 | open_circuit |
-| 3 | short |
-| 4 | spur |
-| 5 | spurious_copper |
-
-### Data Strategy
+## Data Strategy
 
 The final dataset uses a clean 6-class standardization strategy:
 
-- Map common PCB defect categories into one shared class set.
-- Remove unsupported DsPCBSD classes that are not shared by the other sources.
-- Remove invalid/empty labels after class filtering.
-- Preserve the original train/valid/test split structure.
-- Avoid hard class balancing after experiments showed that count balancing alone did not solve per-class detection difficulty.
+* Map common PCB defect categories into one shared class set.
+* Remove unsupported DsPCBSD classes that are not shared by the other sources.
+* Remove invalid or empty labels after class filtering.
+* Preserve the original train/valid/test split structure.
+* Avoid hard class balancing after experiments showed that count balancing alone did not solve per-class detection difficulty.
 
-The project treats remaining weakness in `spur`, `mouse_bite`, and related small defects as a model/data difficulty problem rather than a simple class-count imbalance problem.
-
----
+Remaining weakness in `spur`, `mouse_bite`, and related small defects is treated as a model/data difficulty problem rather than a simple class-count imbalance problem.
 
 ## Benchmark Design
 
@@ -115,31 +109,27 @@ DsPCBSD test only
 HRIPCB test only
 ```
 
-This source-wise evaluation checks whether a model is generally robust or whether performance is being dominated by one dataset source.
-
----
+This source-wise evaluation checks whether a model is generally robust or whether performance is dominated by one dataset source.
 
 ## Models
 
-The benchmark includes five main detection models:
+The benchmark includes five main detection models.
 
-| Notebook | Model | Role |
-|---|---|---|
-| `02_train_yolov11s_datapcb_clean_6cls_sourcewise.ipynb` | YOLOv11s | one-stage baseline |
-| `03_train_rtdetr_l_datapcb_clean_6cls_sourcewise.ipynb` | RT-DETR-L | transformer-based baseline |
-| `04_train_faster_rcnn_datapcb_clean_6cls_sourcewise.ipynb` | Faster R-CNN ResNet50-FPN | two-stage detector baseline |
-| `05_train_yolov11s_cbamlite_bifpnlite_p2_datapcb_clean_6cls_sourcewise.ipynb` | YOLOv11s + CBAMLite + BiFPNLite + P2 | custom small-object-oriented YOLO variant |
-| `06_train_pcbnet_rtdetr_hybridopt_datapcb_clean_6cls_sourcewise.ipynb` | PCBNet-RTDETR-HybridOpt | RT-DETR optimization experiment |
+| Notebook                                                                      | Model                                | Role                               |
+| ----------------------------------------------------------------------------- | ------------------------------------ | ---------------------------------- |
+| `02_train_yolov11s_datapcb_clean_6cls_sourcewise.ipynb`                       | YOLOv11s                             | One-stage baseline                 |
+| `03_train_rtdetr_l_datapcb_clean_6cls_sourcewise.ipynb`                       | RT-DETR-L                            | Transformer-based detector         |
+| `04_train_faster_rcnn_datapcb_clean_6cls_sourcewise.ipynb`                    | Faster R-CNN ResNet50-FPN            | Two-stage baseline                 |
+| `05_train_yolov11s_cbamlite_bifpnlite_p2_datapcb_clean_6cls_sourcewise.ipynb` | YOLOv11s + CBAMLite + BiFPNLite + P2 | Small-object-oriented YOLO variant |
+| `06_train_pcbnet_rtdetr_hybridopt_datapcb_clean_6cls_sourcewise.ipynb`        | PCBNet-RTDETR-HybridOpt              | RT-DETR optimization experiment    |
 
 ### Model Notes
 
-- **YOLOv11s** is used as the practical one-stage baseline.
-- **RT-DETR-L** represents a stronger transformer-based detector.
-- **Faster R-CNN** provides a classical two-stage comparison.
-- **YOLOv11s + CBAMLite + BiFPNLite + P2** tests whether attention, lightweight feature fusion, and a P2 detection head can improve small-defect classes.
-- **PCBNet-RTDETR-HybridOpt** keeps the RT-DETR-L architecture but changes the training/optimization recipe, including higher input resolution and AdamW/cosine-style optimization.
-
----
+* **YOLOv11s** is used as the practical one-stage speed baseline.
+* **RT-DETR-L** represents a stronger transformer-based detector.
+* **Faster R-CNN ResNet50-FPN** provides a classical two-stage comparison.
+* **YOLOv11s + CBAMLite + BiFPNLite + P2** tests whether attention, lightweight feature fusion, and a P2 detection head improve small-defect detection.
+* **PCBNet-RTDETR-HybridOpt** keeps the RT-DETR-L architecture but modifies the optimization recipe, including higher input resolution and AdamW/cosine-style optimization.
 
 ## Benchmark Results
 
@@ -155,39 +145,41 @@ It reads source-wise CSV files from:
 reports/tables/
 ```
 
-and generates consolidated tables and figures.
+and generates consolidated tables and figures under:
+
+```text
+reports/figures/
+```
 
 ### Overall Comparison on Merged Test Set
 
-| Model | Precision | Recall | F1 | mAP50 | mAP50-95 | FPS |
-|---|---:|---:|---:|---:|---:|---:|
-| YOLOv11s | 0.8529 | 0.8053 | 0.8285 | 0.8788 | 0.5761 | 90.7908 |
-| RT-DETR-L | 0.9215 | 0.8970 | 0.9090 | 0.9315 | 0.6595 | 23.7442 |
-| Faster R-CNN | 0.7823 | 0.9004 | 0.8372 | 0.8924 | 0.5918 | 11.2345 |
-| YOLOv11s-CBAMLite-BiFPNLite-P2 | 0.8428 | 0.8146 | 0.8284 | 0.8818 | 0.5764 | 61.0634 |
-| PCBNet-RTDETR-HybridOpt | 0.8945 | 0.8767 | 0.8855 | 0.9177 | 0.6112 | 20.9106 |
+| Model                          | Precision | Recall |     F1 |  mAP50 | mAP50-95 |     FPS |
+| ------------------------------ | --------: | -----: | -----: | -----: | -------: | ------: |
+| YOLOv11s                       |    0.8529 | 0.8053 | 0.8285 | 0.8788 |   0.5761 | 90.7908 |
+| RT-DETR-L                      |    0.9215 | 0.8970 | 0.9090 | 0.9315 |   0.6595 | 23.7442 |
+| Faster R-CNN                   |    0.7823 | 0.9004 | 0.8372 | 0.8924 |   0.5918 | 11.2345 |
+| YOLOv11s-CBAMLite-BiFPNLite-P2 |    0.8428 | 0.8146 | 0.8284 | 0.8818 |   0.5764 | 61.0634 |
+| PCBNet-RTDETR-HybridOpt        |    0.8945 | 0.8767 | 0.8855 | 0.9177 |   0.6112 | 20.9106 |
 
 ### Best Model per Source
 
-| Test Source | Best Model | mAP50-95 | mAP50 | Precision | Recall |
-|---|---|---:|---:|---:|---:|
-| Merged | RT-DETR-L | 0.6595 | 0.9315 | 0.9215 | 0.8970 |
-| DeepPCB | RT-DETR-L | 0.8345 | 0.9862 | 0.9875 | 0.9705 |
-| DsPCBSD | RT-DETR-L | 0.5399 | 0.8699 | 0.8594 | 0.8404 |
-| HRIPCB | RT-DETR-L | 0.5198 | 0.9613 | 0.9742 | 0.9507 |
+| Test Source | Best Model | mAP50-95 |  mAP50 | Precision | Recall |
+| ----------- | ---------- | -------: | -----: | --------: | -----: |
+| Merged      | RT-DETR-L  |   0.6595 | 0.9315 |    0.9215 | 0.8970 |
+| DeepPCB     | RT-DETR-L  |   0.8345 | 0.9862 |    0.9875 | 0.9705 |
+| DsPCBSD     | RT-DETR-L  |   0.5399 | 0.8699 |    0.8594 | 0.8404 |
+| HRIPCB      | RT-DETR-L  |   0.5198 | 0.9613 |    0.9742 | 0.9507 |
 
 ### Best Model per Class on Merged Test
 
-| Class | Best Model | mAP50-95 |
-|---|---|---:|
-| missing_hole | RT-DETR-L | 0.8618 |
-| mouse_bite | RT-DETR-L | 0.5861 |
-| open_circuit | RT-DETR-L | 0.6556 |
-| short | RT-DETR-L | 0.6376 |
-| spur | RT-DETR-L | 0.4847 |
-| spurious_copper | RT-DETR-L | 0.7314 |
-
----
+| Class           | Best Model | mAP50-95 |
+| --------------- | ---------- | -------: |
+| missing_hole    | RT-DETR-L  |   0.8618 |
+| mouse_bite      | RT-DETR-L  |   0.5861 |
+| open_circuit    | RT-DETR-L  |   0.6556 |
+| short           | RT-DETR-L  |   0.6376 |
+| spur            | RT-DETR-L  |   0.4847 |
+| spurious_copper | RT-DETR-L  |   0.7314 |
 
 ## Result Figures
 
@@ -207,8 +199,6 @@ and generates consolidated tables and figures.
 
 ![Weak-class comparison on merged test](reports/figures/weak_class_comparison_merged_test_map50_95.png)
 
----
-
 ## Key Findings
 
 ### 1. RT-DETR-L is the strongest overall model
@@ -216,10 +206,11 @@ and generates consolidated tables and figures.
 RT-DETR-L achieves the best merged-test performance:
 
 ```text
-mAP50    = 0.9315
-mAP50-95 = 0.6595
+mAP50     = 0.9315
+mAP50-95  = 0.6595
 Precision = 0.9215
 Recall    = 0.8970
+FPS       = 23.7442
 ```
 
 It is also the best model on every source-specific test subset: Merged, DeepPCB, DsPCBSD, and HRIPCB. This suggests that transformer-based detection is the most robust option among the tested models for this dataset.
@@ -229,8 +220,9 @@ It is also the best model on every source-specific test subset: Merged, DeepPCB,
 YOLOv11s reaches:
 
 ```text
-FPS      = 90.7908
-mAP50-95 = 0.5761
+FPS       = 90.7908
+mAP50     = 0.8788
+mAP50-95  = 0.5761
 ```
 
 It is substantially faster than RT-DETR-L, but its accuracy is lower. This makes YOLOv11s a useful speed-oriented baseline, but not the best-performing detector in this benchmark.
@@ -251,126 +243,96 @@ YOLOv11s mAP50-95    = 0.5761
 Custom YOLO mAP50-95 = 0.5764
 ```
 
-The improvement is negligible, while inference speed drops from about 90.79 FPS to 61.06 FPS. Based on this result, the added CBAMLite/BiFPNLite/P2 complexity is not justified in its current combined form.
+The improvement is negligible, while inference speed drops from about `90.79 FPS` to `61.06 FPS`. Based on this result, the added CBAMLite/BiFPNLite/P2 complexity is not justified in its current combined form.
 
 ### 4. Faster R-CNN improves recall but remains slower
 
 Faster R-CNN achieves:
 
 ```text
-Recall   = 0.9004
-mAP50-95 = 0.5918
-FPS      = 11.2345
+Recall    = 0.9004
+mAP50     = 0.8924
+mAP50-95  = 0.5918
+FPS       = 11.2345
 ```
 
-It has strong recall, but lower precision and much lower FPS than YOLOv11s. It is useful as a two-stage detector comparison, but it is not the best choice for this benchmark.
+It has strong recall, but its inference speed is significantly lower than YOLOv11s and RT-DETR-L. It is useful as a two-stage reference but less attractive for real-time deployment.
 
 ### 5. PCBNet-RTDETR-HybridOpt did not beat stock RT-DETR-L
 
 PCBNet-RTDETR-HybridOpt achieves:
 
 ```text
-mAP50-95 = 0.6112
-FPS      = 20.9106
+mAP50     = 0.9177
+mAP50-95  = 0.6112
+FPS       = 20.9106
 ```
 
-This is better than YOLOv11s and Faster R-CNN in mAP50-95, but lower than stock RT-DETR-L. The result suggests that the current HybridOpt recipe does not improve over the standard RT-DETR-L training setup.
+Although it remains competitive, it does not outperform the stock RT-DETR-L baseline. This suggests that architecture-level changes or more targeted training strategies may be needed rather than only optimization-level adjustments.
 
 ### 6. Spur remains the hardest class
 
-On the merged test set, RT-DETR-L is the best model for every class. However, `spur` remains the weakest class:
+On the merged test set, `spur` remains the lowest-performing class even for the best model:
 
 ```text
-spur mAP50-95 = 0.4847
+Best spur mAP50-95 = 0.4847
+Best model         = RT-DETR-L
 ```
 
-This supports the hypothesis that the main bottleneck is not simple class-count imbalance, but class-level visual difficulty, localization sensitivity, or source/domain-specific annotation differences.
-
----
+This indicates that `spur` is likely difficult due to visual ambiguity, small defect size, and source-domain variation.
 
 ## Main Benchmark Conclusion
 
-The strongest model in this benchmark is **RT-DETR-L**. It achieves the best merged-test mAP50-95 and is also the best model on DeepPCB, DsPCBSD, and HRIPCB source-specific test sets.
+RT-DETR-L is the best overall model in this benchmark.
 
-The main practical conclusions are:
+It provides the strongest merged-test performance, best source-wise robustness, and best per-class performance. However, YOLOv11s remains the fastest practical baseline and may be more suitable when inference speed is the priority.
 
-- **Best accuracy:** RT-DETR-L
-- **Best speed:** YOLOv11s
-- **Best two-stage comparison:** Faster R-CNN
-- **Custom YOLO-P2 result:** not meaningfully better than YOLOv11s
-- **HybridOpt result:** not better than stock RT-DETR-L
-- **Hardest class:** spur
-- **Most important next step:** error analysis for `spur`, `mouse_bite`, and source-specific failure cases
-
----
+The custom YOLOv11s-CBAMLite-BiFPNLite-P2 variant did not provide a meaningful improvement over stock YOLOv11s, and the PCBNet-RTDETR-HybridOpt experiment did not outperform stock RT-DETR-L.
 
 ## Additional Semi-Supervised DETR Research
 
-I also studied a Semi-DETR-style semi-supervised object detection pipeline on a private academic PCB defect dataset.
-
-The public-safe notebooks are available under:
-
-```text
-notebooks/semidetr/
-```
-
-The experiments include:
-
-- supervised Deformable DETR baseline,
-- vanilla DETR-SSOD baseline,
-- DETR-SSOD + SHM,
-- Semi-DETR ablation with SHM + CQC,
-- full Semi-DETR-style SHM + CQC + CPM.
-
-The original dataset, visual samples, checkpoints, prediction files, and raw training outputs are not public due to confidentiality constraints.
-
-A technical summary is available at:
+This repository also includes a public-safe Semi-DETR research summary under:
 
 ```text
 docs/semidetr_private_research_summary.md
 ```
 
+The purpose of this document is to summarize additional semi-supervised detection research without exposing private training data or confidential project files.
+
 ### Semi-DETR Summary
 
-The Semi-DETR experiments compare supervised and semi-supervised DETR-style detectors under limited labeled-data settings:
+Semi-DETR-style methods are relevant to PCB defect detection because labeled defect data is often limited and expensive to annotate.
 
-```text
-5% labeled data
-10% labeled data
-```
+The research summary discusses:
 
-Public-safe high-level results:
+* pseudo-labeling
+* DETR-style detection
+* labeled/unlabeled data usage
+* potential benefits for industrial defect detection
+* privacy-safe reporting constraints
 
-| Label Ratio | Best Method | Test AP | Gain vs Sup-only |
-|---|---|---:|---:|
-| 5% | DETR-SSOD + SHM | 0.5621 | +0.0199 |
-| 10% | Full SHM+CQC+CPM | 0.6211 | +0.0204 |
-
-The 5% setting suggests that SHM is most useful when labeled data is extremely limited. The 10% setting suggests that the full Semi-DETR-style configuration becomes more beneficial when enough labeled signal is available to stabilize pseudo-label control.
-
-All Semi-DETR notebooks committed to this repository should remain sanitized and output-free.
-
----
+This section is included as additional research context, not as part of the main benchmark result.
 
 ## Repository Structure
 
 ```text
 pcb-defect-detection-benchmark/
-├── README.md
-├── requirements.txt
+│
 ├── configs/
 │   └── data/
-│       ├── kaggle_datapcb_final_clean_6cls.yaml
-│       └── local_datapcb_final_clean_6cls.example.yaml
+│
 ├── data/
-│   └── README.md
+│   ├── raw/
+│   └── processed/
+│
 ├── docs/
-│   ├── data_sources.md
+│   ├── docs_data_sources.md
 │   ├── experiment_log.md
 │   ├── kaggle_links.md
 │   └── semidetr_private_research_summary.md
+│
 ├── notebooks/
-│   ├── 01_prepare_final_datapcb_clean_6cls.ipynb
+│   ├── 01_prepare_final_datapcb_clean_6cls_sourcewise.ipynb
 │   ├── 02_train_yolov11s_datapcb_clean_6cls_sourcewise.ipynb
 │   ├── 03_train_rtdetr_l_datapcb_clean_6cls_sourcewise.ipynb
 │   ├── 04_train_faster_rcnn_datapcb_clean_6cls_sourcewise.ipynb
@@ -378,108 +340,103 @@ pcb-defect-detection-benchmark/
 │   ├── 06_train_pcbnet_rtdetr_hybridopt_datapcb_clean_6cls_sourcewise.ipynb
 │   ├── 07_compare_sourcewise_benchmark_results.ipynb
 │   └── semidetr/
-│       ├── 01_semidetr_data_audit_public_sanitized.ipynb
-│       ├── 02_supervised_deformable_detr_ratio10_public_sanitized.ipynb
-│       ├── 03_vanilla_detr_ssod_ratio10_public_sanitized.ipynb
-│       ├── 04_detr_ssod_shm_ratio10_public_sanitized.ipynb
-│       ├── 05_semidetr_shm_cqc_ablation_ratio10_public_sanitized.ipynb
-│       ├── 06_semidetr_shm_cqc_cpm_full_ratio10_public_sanitized.ipynb
-│       └── 07_semidetr_summary_public_sanitized.ipynb
-└── reports/
-    ├── tables/
-    ├── figures/
-    └── benchmark_readme_summary.md
+│
+├── reports/
+│   ├── figures/
+│   ├── tables/
+│   └── benchmark_readme_summary.md
+│
+├── .gitignore
+├── README.md
+└── requirements.txt
 ```
-
----
 
 ## Reproducibility
 
 ### Environment
 
-Training was performed on Kaggle GPU notebooks.
-
-Install the Python dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-The main experiments use:
+Recommended environment:
 
 ```text
-Python
+Python 3.10+
 PyTorch
 Ultralytics
-TorchVision
-TorchMetrics
 OpenCV
 Pandas
 Matplotlib
+Torchvision
+```
+
+Install dependencies:
+
+```powershell
+pip install -r requirements.txt
 ```
 
 ### Kaggle Workflow
 
-This project follows a Kaggle-based workflow:
+Heavy model training was performed on Kaggle.
 
-```text
-GitHub = documentation, notebooks, result summaries
-Kaggle = training environment, full outputs, logs, checkpoints, and weights
-```
+Local machine is used mainly for:
 
-The full training outputs are not committed to GitHub. Kaggle notebook links should be listed in:
+* repository organization
+* README/documentation
+* notebook cleanup
+* result table/figure storage
 
-```text
-docs/kaggle_links.md
-```
+Training notebooks are designed to be reproducible when the processed dataset is available in the expected path.
 
 ### Data Paths
 
-The processed dataset path on Kaggle is expected to be similar to:
+The final dataset path expected by the benchmark notebooks is:
 
 ```text
-/kaggle/input/datasets/<owner>/pcb-merged/DataPCB_Final_Clean_6cls
+data/processed/DataPCB_Final_Clean_6cls/
 ```
 
-The notebooks copy the dataset to:
+The dataset YAML should point to:
 
-```text
-/kaggle/working/DataPCB_Final_Clean_6cls
+```yaml
+path: data/processed/DataPCB_Final_Clean_6cls
+train: train/images
+val: valid/images
+test: test/images
+nc: 6
+names:
+  - missing_hole
+  - mouse_bite
+  - open_circuit
+  - short
+  - spur
+  - spurious_copper
 ```
-
-before training. This avoids read-only cache issues from `/kaggle/input`.
-
----
 
 ## How to Run
 
 ### 1. Download the dataset archives
 
-Download the dataset archives from:
+Download the dataset zip files from the Google Drive link in the Data Access section.
+
+Expected archives:
 
 ```text
-https://drive.google.com/drive/folders/1HgYeXju6ztRux0FNicaaQ8CKoi9qTl5g?usp=sharing
+DsPCBSD+.zip
+HRIPCB.zip
+DeepPCB.zip
+DataPCB_Final_Clean_6cls.zip
 ```
-
-See:
-
-```text
-docs/data_sources.md
-```
-
-for the expected local structure.
 
 ### 2. Prepare the dataset
 
-Run:
+Use the preparation notebook:
 
 ```text
-notebooks/01_prepare_final_datapcb_clean_6cls.ipynb
+notebooks/01_prepare_final_datapcb_clean_6cls_sourcewise.ipynb
 ```
 
-This creates the cleaned 6-class dataset.
+This notebook prepares the final cleaned 6-class dataset and source-wise evaluation structure.
 
-### 3. Train the main benchmark models
+### 3. Train the benchmark models
 
 Run the training notebooks:
 
@@ -491,18 +448,19 @@ notebooks/05_train_yolov11s_cbamlite_bifpnlite_p2_datapcb_clean_6cls_sourcewise.
 notebooks/06_train_pcbnet_rtdetr_hybridopt_datapcb_clean_6cls_sourcewise.ipynb
 ```
 
-Each training notebook exports source-wise result CSV files.
-
 ### 4. Collect result CSV/PNG files
 
-Download the small result files from Kaggle output and place them in:
+Generated source-wise CSV files should be placed under:
 
 ```text
 reports/tables/
-reports/figures/
 ```
 
-Do not commit weights, checkpoints, or full run folders.
+Generated figures should be placed under:
+
+```text
+reports/figures/
+```
 
 ### 5. Generate the benchmark summary
 
@@ -512,27 +470,19 @@ Run:
 notebooks/07_compare_sourcewise_benchmark_results.ipynb
 ```
 
-This generates final comparison tables, figures, and a README helper file:
-
-```text
-reports/benchmark_readme_summary.md
-```
+This notebook creates consolidated benchmark tables and visualizations.
 
 ### 6. Review the Semi-DETR research summary
-
-Open:
 
 ```text
 docs/semidetr_private_research_summary.md
 ```
 
-The Semi-DETR notebooks under `notebooks/semidetr/` are public-safe sanitized notebooks. They should remain cleared of output before committing.
-
----
+This document summarizes additional Semi-DETR-style research in a public-safe way.
 
 ## What Is Not Committed
 
-The repository intentionally excludes:
+The following are intentionally excluded from Git:
 
 ```text
 data/raw/
@@ -541,43 +491,78 @@ runs/
 weights/
 *.pt
 *.pth
+*.onnx
+*.engine
 *.zip
 ```
 
-Large datasets, full training outputs, and model weights should remain on Kaggle or local storage.
+Large datasets, model weights, and training outputs should be stored externally through Kaggle, Google Drive, or other artifact storage.
 
-For private Semi-DETR research, the following are also excluded:
+## Git Tags / Milestones
+
+Recommended milestone for this benchmark:
+
+| Tag                         | Description                                      |
+| --------------------------- | ------------------------------------------------ |
+| `v0.1-sourcewise-benchmark` | Final source-wise PCB defect detection benchmark |
+
+## Release Notes
+
+Recommended release notes file:
 
 ```text
-private dataset
-raw images
-visual samples
-prediction grids
-confusion matrix images
-model checkpoints
-teacher/student weights
-prediction JSON files
-full training outputs
-raw Kaggle outputs
+docs/release_notes_v0.1_benchmark.md
 ```
 
----
+## Limitations
+
+* The final benchmark is limited to the cleaned 6-class dataset.
+* Performance may not generalize to unseen PCB manufacturing domains.
+* Dataset source differences still affect performance.
+* `spur`, `mouse_bite`, and similar small defects remain difficult.
+* Class-count balancing alone did not solve weak-class performance.
+* Custom architecture changes were tested only in limited forms.
+* Heavy training was performed on Kaggle, not fully reproduced locally.
+
+## Roadmap
+
+Possible next steps:
+
+1. Validate on more PCB datasets.
+2. Add stronger augmentation ablation studies.
+3. Test small-object-specific detectors more systematically.
+4. Add semi-supervised learning experiments with unlabeled PCB images.
+5. Add model export and inference demo.
+6. Add a lightweight Streamlit or Gradio demo for inference visualization.
+7. Compare deployment trade-offs between YOLOv11s and RT-DETR-L.
+
+## CV Summary
+
+Recommended CV project title:
+
+```text
+PCB Defect Detection Benchmark with YOLO, RT-DETR, and Faster R-CNN
+```
+
+Recommended CV bullets:
+
+```text
+- Built a source-wise PCB defect detection benchmark by cleaning and standardizing a merged 6-class dataset from DeepPCB, DsPCBSD, and HRIPCB into YOLO detection format.
+- Benchmarked YOLOv11s, RT-DETR-L, Faster R-CNN ResNet50-FPN, and custom small-object-oriented detection variants across merged and source-specific test sets.
+- Found RT-DETR-L achieved the best merged-test performance with 0.6595 mAP50-95 and 0.9315 mAP50, while YOLOv11s provided the fastest baseline at 90.79 FPS.
+```
 
 ## Notes for Reviewers
 
-This repository is intended to demonstrate:
+This repository is intended as a research-style benchmark project.
 
-- practical dataset cleaning for object detection,
-- YOLO-format data preparation,
-- benchmark design across multiple detector families,
-- source-wise evaluation,
-- per-class and weak-class analysis,
-- custom architecture experimentation,
-- semi-supervised DETR-style research experience,
-- careful handling of private data and large training artifacts.
+The focus is not only on achieving a high detection score, but also on:
 
-For full training logs and downloadable Kaggle outputs, see:
+* dataset cleaning
+* class standardization
+* source-wise evaluation
+* model family comparison
+* weak-class analysis
+* reproducible reporting
 
-```text
-docs/kaggle_links.md
-```
+The benchmark results should be interpreted within the cleaned 6-class dataset and source-wise evaluation protocol described above.
