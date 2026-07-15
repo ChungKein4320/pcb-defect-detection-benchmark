@@ -2,7 +2,9 @@
 
 ### Overall comparison on merged test set
 
-| model_display_name             |   precision |   recall |     f1 |   mAP50 |   mAP50_95 |     FPS |
+`FPS` values below are historical notebook outputs, not a standardized cross-framework latency benchmark. See `docs/benchmark_protocol.md`.
+
+| model_display_name             |   precision |   recall |     f1 |   mAP50 |   mAP50_95 | Recorded FPS |
 |:-------------------------------|------------:|---------:|-------:|--------:|-----------:|--------:|
 | YOLOv11s                       |      0.8529 |   0.8053 | 0.8285 |  0.8788 |     0.5761 | 90.7908 |
 | RT-DETR-L                      |      0.9215 |   0.897  | 0.909  |  0.9315 |     0.6595 | 23.7442 |

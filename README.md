@@ -11,7 +11,7 @@ This project focuses on building a reproducible PCB defect detection benchmark, 
 * Benchmarked YOLOv11s, RT-DETR-L, Faster R-CNN ResNet50-FPN, YOLOv11s-CBAMLite-BiFPNLite-P2, and PCBNet-RTDETR-HybridOpt.
 * Evaluated models on merged and source-specific test sets to analyze domain robustness.
 * Best merged-test model: RT-DETR-L with `0.9315 mAP50` and `0.6595 mAP50-95`.
-* Fastest practical baseline: YOLOv11s with `90.79 FPS`.
+* Highest recorded evaluation throughput: YOLOv11s with `90.79 FPS` in the original notebook logs; this was not a standardized cross-framework latency test.
 * Added result tables, figures, source-wise evaluation, and a public-disclosure summary of a separate confidential-data Semi-DETR study.
 
 ## Problem Statement
@@ -153,13 +153,15 @@ reports/figures/
 
 ### Overall Comparison on Merged Test Set
 
-| Model                          | Precision | Recall |     F1 |  mAP50 | mAP50-95 |     FPS |
+| Model                          | Precision | Recall |     F1 |  mAP50 | mAP50-95 | Recorded FPS* |
 | ------------------------------ | --------: | -----: | -----: | -----: | -------: | ------: |
 | YOLOv11s                       |    0.8529 | 0.8053 | 0.8285 | 0.8788 |   0.5761 | 90.7908 |
 | RT-DETR-L                      |    0.9215 | 0.8970 | 0.9090 | 0.9315 |   0.6595 | 23.7442 |
 | Faster R-CNN                   |    0.7823 | 0.9004 | 0.8372 | 0.8924 |   0.5918 | 11.2345 |
 | YOLOv11s-CBAMLite-BiFPNLite-P2 |    0.8428 | 0.8146 | 0.8284 | 0.8818 |   0.5764 | 61.0634 |
 | PCBNet-RTDETR-HybridOpt        |    0.8945 | 0.8767 | 0.8855 | 0.9177 |   0.6112 | 20.9106 |
+
+\* `Recorded FPS` preserves the values emitted by the original notebooks. Batch size, device count, input size, runtime, and timed scope were not controlled across all models. See [`docs/benchmark_protocol.md`](docs/benchmark_protocol.md).
 
 ### Best Model per Source
 
@@ -210,17 +212,17 @@ mAP50     = 0.9315
 mAP50-95  = 0.6595
 Precision = 0.9215
 Recall    = 0.8970
-FPS       = 23.7442
+Recorded FPS = 23.7442
 ```
 
 It is also the best model on every source-specific test subset: Merged, DeepPCB, DsPCBSD, and HRIPCB. This suggests that transformer-based detection is the most robust option among the tested models for this dataset.
 
-### 2. YOLOv11s is the fastest practical baseline
+### 2. YOLOv11s has the highest recorded evaluation throughput
 
 YOLOv11s reaches:
 
 ```text
-FPS       = 90.7908
+Recorded FPS = 90.7908
 mAP50     = 0.8788
 mAP50-95  = 0.5761
 ```
@@ -233,7 +235,7 @@ YOLOv11s + CBAMLite + BiFPNLite + P2 achieves:
 
 ```text
 mAP50-95 = 0.5764
-FPS      = 61.0634
+Recorded FPS = 61.0634
 ```
 
 Compared with stock YOLOv11s:
@@ -243,7 +245,7 @@ YOLOv11s mAP50-95    = 0.5761
 Custom YOLO mAP50-95 = 0.5764
 ```
 
-The improvement is negligible, while inference speed drops from about `90.79 FPS` to `61.06 FPS`. Based on this result, the added CBAMLite/BiFPNLite/P2 complexity is not justified in its current combined form.
+The mAP improvement is negligible. The original logs record `90.79 FPS` for stock YOLOv11s and `61.06 FPS` for this variant, but those runs used different evaluation batch/device settings. The speed gap is directional evidence, not a controlled latency comparison; the added complexity is not justified by the measured accuracy gain.
 
 ### 4. Faster R-CNN improves recall but remains slower
 
@@ -253,10 +255,10 @@ Faster R-CNN achieves:
 Recall    = 0.9004
 mAP50     = 0.8924
 mAP50-95  = 0.5918
-FPS       = 11.2345
+Recorded FPS = 11.2345
 ```
 
-It has strong recall, but its inference speed is significantly lower than YOLOv11s and RT-DETR-L. It is useful as a two-stage reference but less attractive for real-time deployment.
+It has strong recall and remains useful as a two-stage reference. Its historical timing used a broader evaluation-loop scope than the Ultralytics models, so a controlled latency run is required before drawing real-time deployment conclusions.
 
 ### 5. PCBNet-RTDETR-HybridOpt did not beat stock RT-DETR-L
 
@@ -265,7 +267,7 @@ PCBNet-RTDETR-HybridOpt achieves:
 ```text
 mAP50     = 0.9177
 mAP50-95  = 0.6112
-FPS       = 20.9106
+Recorded FPS = 20.9106
 ```
 
 Although it remains competitive, it does not outperform the stock RT-DETR-L baseline. This suggests that architecture-level changes or more targeted training strategies may be needed rather than only optimization-level adjustments.
@@ -285,7 +287,7 @@ This indicates that `spur` is likely difficult due to visual ambiguity, small de
 
 RT-DETR-L is the best overall model in this benchmark.
 
-It provides the strongest merged-test performance, best source-wise robustness, and best per-class performance. However, YOLOv11s remains the fastest practical baseline and may be more suitable when inference speed is the priority.
+It provides the strongest merged-test performance, best source-wise robustness, and best per-class performance. YOLOv11s has the highest recorded throughput in the original logs, but deployment-speed selection requires the standardized protocol described in `docs/benchmark_protocol.md`.
 
 The custom YOLOv11s-CBAMLite-BiFPNLite-P2 variant did not provide a meaningful improvement over stock YOLOv11s, and the PCBNet-RTDETR-HybridOpt experiment did not outperform stock RT-DETR-L.
 
@@ -328,6 +330,7 @@ pcb-defect-detection-benchmark/
 │   └── processed/
 │
 ├── docs/
+│   ├── benchmark_protocol.md
 │   ├── docs_data_sources.md
 │   ├── experiment_log.md
 │   ├── kaggle_links.md
@@ -557,7 +560,7 @@ Recommended CV bullets:
 ```text
 - Built a source-wise PCB defect detection benchmark by cleaning and standardizing a merged 6-class dataset from DeepPCB, DsPCBSD, and HRIPCB into YOLO detection format.
 - Benchmarked YOLOv11s, RT-DETR-L, Faster R-CNN ResNet50-FPN, and custom small-object-oriented detection variants across merged and source-specific test sets.
-- Found RT-DETR-L achieved the best merged-test performance with 0.6595 mAP50-95 and 0.9315 mAP50, while YOLOv11s provided the fastest baseline at 90.79 FPS.
+- Found RT-DETR-L achieved the best merged-test performance with 0.6595 mAP50-95 and 0.9315 mAP50; analysis also showed that the custom small-object YOLO variant added complexity without meaningful mAP improvement.
 ```
 
 ## Notes for Reviewers

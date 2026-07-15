@@ -1,0 +1,6 @@
+model_display_name,timed_images,input_size,eval_batch,eval_device,timing_method,timed_scope,warmup,repetitions,precision_mode,recorded_inference_ms_per_image,recorded_fps,status
+YOLOv11s,1887,640,32,"cuda:0,cuda:1",ultralytics_metrics_speed_inference,framework_reported_inference_component,not_recorded,not_recorded,not_recorded,11.014335777955615,90.79076761046512,historical_not_standardized
+RT-DETR-L,1887,640,32,"cuda:0,cuda:1",ultralytics_metrics_speed_inference,framework_reported_inference_component,not_recorded,not_recorded,not_recorded,42.1155633698972,23.74419145761129,historical_not_standardized
+Faster R-CNN,1887,640,8,cuda:0,manual_evaluation_loop_wall_time,"device_transfer+forward+cpu_conversion+metric_update",not_recorded,not_recorded,not_recorded,89.01157338719047,11.234494144375034,historical_not_standardized
+YOLOv11s-CBAMLite-BiFPNLite-P2,1887,640,16,cuda:0,ultralytics_metrics_speed_inference,framework_reported_inference_component,not_recorded,not_recorded,not_recorded,16.376420488079066,61.0634052006623,historical_not_standardized
+PCBNet-RTDETR-HybridOpt,1887,768,16,"cuda:0,cuda:1",ultralytics_metrics_speed_inference,framework_reported_inference_component,not_recorded,not_recorded,not_recorded,47.82263830365962,20.91059873464729,historical_not_standardized

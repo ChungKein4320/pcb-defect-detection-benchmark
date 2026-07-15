@@ -86,13 +86,15 @@ This source-wise evaluation was used to check whether each model generalizes acr
 
 ## Overall Merged-test Results
 
-| Model                          | Precision | Recall |     F1 |  mAP50 | mAP50-95 |     FPS |
+| Model                          | Precision | Recall |     F1 |  mAP50 | mAP50-95 | Recorded FPS* |
 | ------------------------------ | --------: | -----: | -----: | -----: | -------: | ------: |
 | YOLOv11s                       |    0.8529 | 0.8053 | 0.8285 | 0.8788 |   0.5761 | 90.7908 |
 | RT-DETR-L                      |    0.9215 | 0.8970 | 0.9090 | 0.9315 |   0.6595 | 23.7442 |
 | Faster R-CNN                   |    0.7823 | 0.9004 | 0.8372 | 0.8924 |   0.5918 | 11.2345 |
 | YOLOv11s-CBAMLite-BiFPNLite-P2 |    0.8428 | 0.8146 | 0.8284 | 0.8818 |   0.5764 | 61.0634 |
 | PCBNet-RTDETR-HybridOpt        |    0.8945 | 0.8767 | 0.8855 | 0.9177 |   0.6112 | 20.9106 |
+
+\* Historical notebook values, not a standardized cross-framework latency benchmark. See `docs/benchmark_protocol.md`.
 
 ## Best Model per Source
 
@@ -114,22 +116,22 @@ mAP50     = 0.9315
 mAP50-95  = 0.6595
 Precision = 0.9215
 Recall    = 0.8970
-FPS       = 23.7442
+Recorded FPS = 23.7442
 ```
 
 It also achieved the best source-wise performance on Merged, DeepPCB, DsPCBSD, and HRIPCB test subsets.
 
-### YOLOv11s is the fastest practical baseline
+### YOLOv11s has the highest recorded evaluation throughput
 
 YOLOv11s achieved:
 
 ```text
-FPS       = 90.7908
+Recorded FPS = 90.7908
 mAP50     = 0.8788
 mAP50-95  = 0.5761
 ```
 
-It is much faster than RT-DETR-L, but less accurate. It remains useful as a speed-oriented baseline.
+It recorded higher throughput than RT-DETR-L in the original notebook logs, but the runs were not a controlled cross-framework latency comparison. It remains a candidate for a future standardized speed benchmark.
 
 ### The custom YOLOv11s-P2 variant did not meaningfully improve accuracy
 
@@ -137,7 +139,7 @@ YOLOv11s-CBAMLite-BiFPNLite-P2 achieved:
 
 ```text
 mAP50-95 = 0.5764
-FPS      = 61.0634
+Recorded FPS = 61.0634
 ```
 
 This is only a negligible improvement over stock YOLOv11s:
@@ -157,10 +159,10 @@ Faster R-CNN achieved strong recall:
 Recall    = 0.9004
 mAP50     = 0.8924
 mAP50-95  = 0.5918
-FPS       = 11.2345
+Recorded FPS = 11.2345
 ```
 
-It is useful as a two-stage detector reference, but it is less practical for real-time use.
+It is useful as a two-stage detector reference. Its historical timer covered a broader evaluation-loop scope than the Ultralytics timing field, so the recorded FPS must not be used alone to judge real-time suitability.
 
 ### PCBNet-RTDETR-HybridOpt did not beat stock RT-DETR-L
 
@@ -169,7 +171,7 @@ PCBNet-RTDETR-HybridOpt remained competitive but did not outperform RT-DETR-L:
 ```text
 mAP50     = 0.9177
 mAP50-95  = 0.6112
-FPS       = 20.9106
+Recorded FPS = 20.9106
 ```
 
 This suggests that optimization-level changes alone were not enough to outperform the stock RT-DETR-L baseline.
@@ -259,5 +261,5 @@ Recommended CV bullets:
 ```text
 - Built a source-wise PCB defect detection benchmark by cleaning and standardizing a merged 6-class dataset from DeepPCB, DsPCBSD, and HRIPCB into YOLO detection format.
 - Benchmarked YOLOv11s, RT-DETR-L, Faster R-CNN ResNet50-FPN, and custom small-object-oriented detection variants across merged and source-specific test sets.
-- Found RT-DETR-L achieved the best merged-test performance with 0.6595 mAP50-95 and 0.9315 mAP50, while YOLOv11s provided the fastest baseline at 90.79 FPS.
+- Found RT-DETR-L achieved the best merged-test performance with 0.6595 mAP50-95 and 0.9315 mAP50; analysis also showed that the custom small-object YOLO variant added complexity without meaningful mAP improvement.
 ```
