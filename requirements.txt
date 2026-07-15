@@ -1,3 +1,12 @@
+# Core versions recorded by the executed benchmark notebooks.
+# Install the PyTorch build that matches the host CUDA/driver stack.
+torch==2.10.0
+torchvision==0.25.0
+ultralytics==8.4.30
+transformers==4.40.2
+
+# Historical versions for these packages were not captured; do not pretend this
+# is a full lockfile. See docs/reproducibility.md.
 numpy
 pandas
 matplotlib
@@ -5,10 +14,10 @@ opencv-python
 pyyaml
 tqdm
 scikit-learn
-torch
-torchvision
 torchmetrics
-ultralytics
 pycocotools
-transformers
 Pillow
+albumentations>=1.3.0
+timm
+ipython
+jupyterlab

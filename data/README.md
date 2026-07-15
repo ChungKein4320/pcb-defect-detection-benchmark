@@ -13,7 +13,7 @@ https://drive.google.com/drive/folders/1HgYeXju6ztRux0FNicaaQ8CKoi9qTl5g?usp=sha
 See the detailed data source guide:
 
 ```text
-docs/data_sources.md
+docs/docs_data_sources.md
 ```
 
 ## Included Archives

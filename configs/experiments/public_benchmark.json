@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "status": "historical_experiment_manifest",
+  "dataset": {
+    "name": "DataPCB_Final_Clean_6cls",
+    "local_config": "configs/data/local_datapcb_final_clean_6cls.example.yaml",
+    "num_classes": 6,
+    "classes": [
+      "missing_hole",
+      "mouse_bite",
+      "open_circuit",
+      "short",
+      "spur",
+      "spurious_copper"
+    ],
+    "test_images": 1887,
+    "test_sources": ["Merged", "DeepPCB", "DsPCBSD", "HRIPCB"]
+  },
+  "historical_environment_evidence": {
+    "platform": "Kaggle",
+    "python": "3.12.12",
+    "torch": "2.10.0+cu128",
+    "torchvision": "0.25.0+cu128",
+    "ultralytics": "8.4.30",
+    "gpu_visible": ["Tesla T4", "Tesla T4"]
+  },
+  "evaluation": {
+    "primary_metric": "mAP50_95",
+    "comparison_table": "reports/tables/model_comparison_merged_test.csv",
+    "timing_context": "reports/tables/historical_timing_context.csv",
+    "backend_note": "Ultralytics models and Faster R-CNN did not use one shared evaluator; see docs/benchmark_protocol.md"
+  },
+  "experiments": [
+    {
+      "id": "yolov11s_final_clean_6cls_e50",
+      "display_name": "YOLOv11s",
+      "model_name": "yolo11s.pt",
+      "family": "one_stage",
+      "notebook": "notebooks/02_train_yolov11s_datapcb_clean_6cls_sourcewise.ipynb",
+      "results_file": "reports/tables/yolov11s_final_clean_6cls_e50_sourcewise_summary_metrics.csv",
+      "image_size": 640,
+      "epochs": 50,
+      "train_batch": 32,
+      "eval_batch": 32,
+      "train_device": [0, 1],
+      "eval_device": [0, 1],
+      "seed": 42,
+      "evaluator": "ultralytics"
+    },
+    {
+      "id": "rtdetr_l_final_clean_6cls_e50",
+      "display_name": "RT-DETR-L",
+      "model_name": "rtdetr-l.pt",
+      "family": "transformer",
+      "notebook": "notebooks/03_train_rtdetr_l_datapcb_clean_6cls_sourcewise.ipynb",
+      "results_file": "reports/tables/rtdetr_l_final_clean_6cls_e50_sourcewise_summary_metrics.csv",
+      "image_size": 640,
+      "epochs": 50,
+      "train_batch": 32,
+      "eval_batch": 32,
+      "train_device": [0, 1],
+      "eval_device": [0, 1],
+      "seed": 42,
+      "evaluator": "ultralytics"
+    },
+    {
+      "id": "faster_rcnn_resnet50_fpn_final_clean_6cls_e42",
+      "display_name": "Faster R-CNN",
+      "model_name": "faster_rcnn_resnet50_fpn",
+      "family": "two_stage",
+      "notebook": "notebooks/04_train_faster_rcnn_datapcb_clean_6cls_sourcewise.ipynb",
+      "results_file": "reports/tables/faster_rcnn_resnet50_fpn_final_clean_6cls_e42_sourcewise_summary_metrics.csv",
+      "image_size": 640,
+      "epochs": 42,
+      "train_batch": 8,
+      "eval_batch": 8,
+      "train_device": [0],
+      "eval_device": [0],
+      "seed": 42,
+      "evaluator": "torchmetrics_pycocotools"
+    },
+    {
+      "id": "yolov11s_cbamlite_bifpnlite_p2_final_clean_6cls_e50",
+      "display_name": "YOLOv11s-CBAMLite-BiFPNLite-P2",
+      "model_name": "yolov11s_cbamlite_bifpnlite_p2",
+      "family": "one_stage_custom",
+      "notebook": "notebooks/05_train_yolov11s_cbamlite_bifpnlite_p2_datapcb_clean_6cls_sourcewise.ipynb",
+      "results_file": "reports/tables/yolov11s_cbamlite_bifpnlite_p2_final_clean_6cls_e50_sourcewise_summary_metrics.csv",
+      "image_size": 640,
+      "epochs": 50,
+      "train_batch": 16,
+      "eval_batch": 16,
+      "train_device": [0],
+      "eval_device": [0],
+      "seed": 42,
+      "evaluator": "ultralytics"
+    },
+    {
+      "id": "pcbnet_rtdetr_l_hybridopt_final_clean_6cls_e50_img768",
+      "display_name": "PCBNet-RTDETR-HybridOpt",
+      "model_name": "pcbnet_rtdetr_l_hybridopt",
+      "family": "transformer_optimization_variant",
+      "notebook": "notebooks/06_train_pcbnet_rtdetr_hybridopt_datapcb_clean_6cls_sourcewise.ipynb",
+      "results_file": "reports/tables/pcbnet_rtdetr_l_hybridopt_final_clean_6cls_e50_img768_sourcewise_summary_metrics.csv",
+      "image_size": 768,
+      "epochs": 50,
+      "train_batch": 16,
+      "eval_batch": 16,
+      "train_device": [0, 1],
+      "eval_device": [0, 1],
+      "seed": 42,
+      "evaluator": "ultralytics"
+    }
+  ]
+}

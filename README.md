@@ -323,7 +323,8 @@ This section is included as additional research context, not as part of the main
 pcb-defect-detection-benchmark/
 │
 ├── configs/
-│   └── data/
+│   ├── data/
+│   └── experiments/
 │
 ├── data/
 │   ├── raw/
@@ -334,6 +335,7 @@ pcb-defect-detection-benchmark/
 │   ├── docs_data_sources.md
 │   ├── experiment_log.md
 │   ├── kaggle_links.md
+│   ├── reproducibility.md
 │   └── semidetr_private_research_summary.md
 │
 ├── notebooks/
@@ -351,6 +353,9 @@ pcb-defect-detection-benchmark/
 │   ├── tables/
 │   └── benchmark_readme_summary.md
 │
+├── scripts/
+├── tests/
+│
 ├── .gitignore
 ├── README.md
 └── requirements.txt
@@ -360,10 +365,12 @@ pcb-defect-detection-benchmark/
 
 ### Environment
 
-Recommended environment:
+The historical core environment used Python `3.12.12`, PyTorch `2.10.0+cu128`, Torchvision `0.25.0+cu128`, and Ultralytics `8.4.30`. `requirements.txt` pins the corresponding core Python versions where supported, but it is not a complete lockfile.
+
+Recommended review environment:
 
 ```text
-Python 3.10+
+Python 3.12
 PyTorch
 Ultralytics
 OpenCV
@@ -378,6 +385,16 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
+Run the offline checks before attempting training:
+
+```powershell
+python scripts\validate_reproducibility.py
+python scripts\check_semidetr_public_safety.py
+python -m unittest discover -s tests -v
+```
+
+These commands validate the committed experiment manifest, result provenance, timing arithmetic, Semi-DETR disclosure boundary, and regression tests without downloading data or using a GPU. See [`docs/reproducibility.md`](docs/reproducibility.md) for the exact scope and limitations.
+
 ### Kaggle Workflow
 
 Heavy model training was performed on Kaggle.
@@ -389,7 +406,7 @@ Local machine is used mainly for:
 * notebook cleanup
 * result table/figure storage
 
-The public 6-class benchmark notebooks are designed to be reproducible when the processed public-source dataset is available in the expected path. The confidential-data Semi-DETR results are code-auditable but not publicly data-reproducible.
+The public 6-class benchmark includes auditable notebooks, result artifacts, and a machine-readable historical experiment manifest. A full training rerun still requires the processed public-source dataset, model downloads, and compatible GPU resources. The confidential-data Semi-DETR results are code-auditable but not publicly data-reproducible.
 
 ### Data Paths
 
