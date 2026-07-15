@@ -96,6 +96,8 @@ The final dataset uses a clean 6-class standardization strategy:
 * Preserve the original train/valid/test split structure.
 * Avoid hard class balancing after experiments showed that count balancing alone did not solve per-class detection difficulty.
 
+The processed local snapshot was audited for image/label pairing, valid YOLO rows, corrupt images, repeated source IDs, and byte-identical images. No invalid records, repeated source IDs, or byte-identical SHA-256 groups were found within or across splits. This is an exact-duplicate audit, not proof that all visual, board-level, or template-level leakage is absent. See `docs/dataset_integrity.md` and `reports/dataset_integrity_summary.json`.
+
 Remaining weakness in `spur`, `mouse_bite`, and related small defects is treated as a model/data difficulty problem rather than a simple class-count imbalance problem.
 
 ## Benchmark Design
@@ -549,6 +551,7 @@ docs/release_notes_v0.1_benchmark.md
 * Class-count balancing alone did not solve weak-class performance.
 * Custom architecture changes were tested only in limited forms.
 * Heavy training was performed on Kaggle, not fully reproduced locally.
+* The integrity audit found no exact cross-split duplicates or repeated exported source IDs, but does not rule out visually similar or same-template PCB overlap.
 * Semi-DETR uses a separate confidential 5-class dataset; its reported results cannot be independently reproduced from this repository.
 * Semi-DETR AP values are not directly comparable with the public 6-class benchmark results.
 

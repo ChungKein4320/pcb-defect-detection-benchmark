@@ -1,0 +1,100 @@
+{
+  "cross_split": {
+    "byte_identical_sha256_groups": 0,
+    "identical_filename_stem_groups": 0,
+    "normalized_source_id_groups": 0
+  },
+  "data_yaml_absolute_path": true,
+  "dataset_fingerprint_sha256": "875797d2c834bf374f12e25fd74d2c84f4bcdef650d681549c3081cca511fa4e",
+  "errors": [],
+  "schema_version": 1,
+  "scope": {
+    "checks": [
+      "image-label pairing",
+      "Pillow image verification",
+      "YOLO label syntax and normalized bounds",
+      "cross-split filename stems",
+      "cross-split normalized source IDs",
+      "cross-split byte-identical SHA-256 images"
+    ],
+    "not_claimed": [
+      "absence of visually similar images",
+      "absence of same-PCB or same-template overlap",
+      "absence of all possible data leakage"
+    ]
+  },
+  "splits": {
+    "test": {
+      "class_box_counts": {
+        "0": 986,
+        "1": 1009,
+        "2": 776,
+        "3": 528,
+        "4": 1389,
+        "5": 664
+      },
+      "corrupt_images": 0,
+      "images": 1887,
+      "invalid_label_rows": 0,
+      "labels": 1887,
+      "missing_images": 0,
+      "missing_labels": 0,
+      "source_image_counts": {
+        "DeepPCB": 300,
+        "DsPCBSD": 1448,
+        "HRIPCB": 139
+      }
+    },
+    "train": {
+      "class_box_counts": {
+        "0": 3417,
+        "1": 3517,
+        "2": 3007,
+        "3": 2077,
+        "4": 4599,
+        "5": 2559
+      },
+      "corrupt_images": 0,
+      "images": 6624,
+      "invalid_label_rows": 0,
+      "labels": 6624,
+      "missing_images": 0,
+      "missing_labels": 0,
+      "source_image_counts": {
+        "DeepPCB": 1050,
+        "DsPCBSD": 5089,
+        "HRIPCB": 485
+      }
+    },
+    "valid": {
+      "class_box_counts": {
+        "0": 478,
+        "1": 460,
+        "2": 411,
+        "3": 307,
+        "4": 709,
+        "5": 347
+      },
+      "corrupt_images": 0,
+      "images": 937,
+      "invalid_label_rows": 0,
+      "labels": 937,
+      "missing_images": 0,
+      "missing_labels": 0,
+      "source_image_counts": {
+        "DeepPCB": 150,
+        "DsPCBSD": 718,
+        "HRIPCB": 69
+      }
+    }
+  },
+  "status": "passed",
+  "warnings": [
+    "data.yaml uses an environment-specific absolute path; use a local config"
+  ],
+  "within_split": {
+    "byte_identical_sha256_groups": 0,
+    "identical_filename_stem_groups": 0,
+    "normalized_source_id_groups": 0
+  }
+}

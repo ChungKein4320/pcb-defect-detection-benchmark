@@ -86,3 +86,5 @@ Only this `README.md` file is committed to document the expected data layout.
 Training is performed on Kaggle. Local data is used only for backup, inspection, and project organization.
 
 Full datasets, processed outputs, training runs, and weights are not committed to this repository.
+
+After extracting the processed dataset, run the aggregate integrity audit documented in `docs/dataset_integrity.md`. If the archive's `data.yaml` still contains a Kaggle-specific absolute `path`, use the local configuration template in `configs/data/local_datapcb_final_clean_6cls.example.yaml` or update that local, ignored file for the current environment.

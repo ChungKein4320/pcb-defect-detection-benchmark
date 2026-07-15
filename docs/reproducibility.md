@@ -7,6 +7,7 @@ The public 6-class benchmark includes the data-preparation logic, training/evalu
 There are two different reproducibility levels:
 
 - **Offline artifact validation:** available without a GPU or dataset. It checks experiment configuration, committed result provenance, timing arithmetic, required dependencies, and documentation links.
+- **Local dataset integrity audit:** requires the processed public dataset and checks image/label validity plus exact cross-split identity indicators.
 - **Training/evaluation rerun:** requires the public-source PCB datasets, the processed dataset layout, Kaggle or equivalent GPU resources, and model downloads.
 
 The separate confidential-data Semi-DETR study is code-auditable but not publicly data-reproducible. See `docs/semidetr_private_research_summary.md`.
@@ -82,6 +83,16 @@ data/processed/DataPCB_Final_Clean_6cls/
 
 The committed preparation notebook reports 6,624 training images, 937 validation images, and 1,887 test images.
 
+After preparing or extracting the dataset, run:
+
+```powershell
+python scripts\audit_dataset_integrity.py `
+  data\processed\DataPCB_Final_Clean_6cls `
+  --output reports\dataset_integrity_summary.json
+```
+
+See `docs/dataset_integrity.md` for the exact checks, audited aggregate result, and limitations.
+
 ## Recommended Execution Order
 
 1. Run `notebooks/01_prepare_final_datapcb_clean_6cls_sourcewise.ipynb` or use the documented processed archive.
@@ -97,4 +108,5 @@ The committed preparation notebook reports 6,624 training images, 937 validation
 - The public benchmark uses two evaluator implementations; see `docs/benchmark_protocol.md`.
 - Historical FPS values are not a standardized latency benchmark.
 - The experiment manifest validates recorded settings but does not yet drive the notebooks.
+- The exact-identity dataset audit cannot rule out same-board, near-duplicate, or same-template overlap.
 - Full bit-for-bit environment recreation is not possible because a complete historical package lock was not captured.
