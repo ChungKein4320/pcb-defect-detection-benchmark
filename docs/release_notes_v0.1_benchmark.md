@@ -187,7 +187,7 @@ This likely comes from small defect size, visual ambiguity, and source-domain va
 
 ## Additional Semi-DETR Research Summary
 
-This release also includes a public-safe Semi-DETR research summary:
+This release also includes a public-disclosure summary of a separate confidential-data Semi-DETR study:
 
 ```text
 docs/semidetr_private_research_summary.md

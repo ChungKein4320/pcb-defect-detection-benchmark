@@ -12,7 +12,7 @@ This project focuses on building a reproducible PCB defect detection benchmark, 
 * Evaluated models on merged and source-specific test sets to analyze domain robustness.
 * Best merged-test model: RT-DETR-L with `0.9315 mAP50` and `0.6595 mAP50-95`.
 * Fastest practical baseline: YOLOv11s with `90.79 FPS`.
-* Added result tables, figures, source-wise evaluation, and a public-safe Semi-DETR research summary.
+* Added result tables, figures, source-wise evaluation, and a public-disclosure summary of a separate confidential-data Semi-DETR study.
 
 ## Problem Statement
 
@@ -291,13 +291,15 @@ The custom YOLOv11s-CBAMLite-BiFPNLite-P2 variant did not provide a meaningful i
 
 ## Additional Semi-Supervised DETR Research
 
-This repository also includes a public-safe Semi-DETR research summary under:
+This repository also includes a public-disclosure Semi-DETR research summary under:
 
 ```text
 docs/semidetr_private_research_summary.md
 ```
 
 The purpose of this document is to summarize additional semi-supervised detection research without exposing private training data or confidential project files.
+
+This is a separate internal experiment on a confidential 5-class dataset. It is not part of the public 6-class benchmark above, and its AP values must not be compared directly with the public benchmark table. The notebooks make the implementation flow reviewable, but the reported internal results cannot be independently reproduced without the excluded dataset and artifacts.
 
 ### Semi-DETR Summary
 
@@ -309,9 +311,9 @@ The research summary discusses:
 * DETR-style detection
 * labeled/unlabeled data usage
 * potential benefits for industrial defect detection
-* privacy-safe reporting constraints
+* confidentiality-aware reporting constraints
 
-This section is included as additional research context, not as part of the main benchmark result.
+This section is included as additional research context, not as part of the main benchmark result. The numeric table in the research summary is explicitly labeled as reported internal evidence.
 
 ## Repository Structure
 
@@ -384,7 +386,7 @@ Local machine is used mainly for:
 * notebook cleanup
 * result table/figure storage
 
-Training notebooks are designed to be reproducible when the processed dataset is available in the expected path.
+The public 6-class benchmark notebooks are designed to be reproducible when the processed public-source dataset is available in the expected path. The confidential-data Semi-DETR results are code-auditable but not publicly data-reproducible.
 
 ### Data Paths
 
@@ -478,7 +480,11 @@ This notebook creates consolidated benchmark tables and visualizations.
 docs/semidetr_private_research_summary.md
 ```
 
-This document summarizes additional Semi-DETR-style research in a public-safe way.
+This document summarizes a separate confidential-data Semi-DETR study as a public-disclosure artifact. Before committing changes to its notebooks, run:
+
+```powershell
+python scripts\check_semidetr_public_safety.py
+```
 
 ## What Is Not Committed
 
@@ -523,6 +529,8 @@ docs/release_notes_v0.1_benchmark.md
 * Class-count balancing alone did not solve weak-class performance.
 * Custom architecture changes were tested only in limited forms.
 * Heavy training was performed on Kaggle, not fully reproduced locally.
+* Semi-DETR uses a separate confidential 5-class dataset; its reported results cannot be independently reproduced from this repository.
+* Semi-DETR AP values are not directly comparable with the public 6-class benchmark results.
 
 ## Roadmap
 

@@ -1,8 +1,16 @@
-# Semi-DETR Private Research Summary
+# Semi-DETR Confidential-Data Research Summary
 
 This document summarizes a private academic experiment on semi-supervised object detection for PCB defect detection.
 
 The original dataset, visual samples, prediction images, training outputs, checkpoints, model weights, and raw experiment artifacts are **not public** due to confidentiality constraints. This repository only includes sanitized notebooks with cleared outputs and this high-level technical summary.
+
+## Public Reproducibility Status
+
+This is a separate internal experiment on a confidential 5-class dataset. It is not part of the repository's public 6-class benchmark.
+
+The public notebooks make the implementation and experiment design reviewable, but they cannot reproduce the reported numbers without the excluded dataset, split artifacts, weights, and raw evaluation outputs. The result table below must therefore be read as **reported internal results**, not as an independently reproducible public benchmark. Its AP values should not be compared directly with the public 6-class benchmark.
+
+The sanitized notebooks read the private dataset location from `PCB_SEMIDETR_DATA_ROOT`. A private working environment may set that variable, but a real dataset-owner path must not be committed.
 
 ## Objective
 
@@ -21,7 +29,7 @@ The main research question was:
 Can semi-supervised DETR-style training improve detection performance when only a small portion of PCB images are labeled?
 ```
 
-## Public-Safe Notebook Set
+## Public-Disclosure Notebook Set
 
 The sanitized notebooks are placed under:
 
@@ -121,9 +129,9 @@ CQC is used to improve consistency at the query level, reducing unstable pseudo-
 
 CPM is used to control or refine pseudo-label usage in the full semi-supervised setting.
 
-## Summary Results
+## Reported Internal Results
 
-The table below is copied from the sanitized summary notebook. It reports validation and test AP-style metrics for both 5% and 10% labeled-data settings.
+The table below was transcribed from the internal summary artifact. It reports validation and test AP-style metrics for both 5% and 10% labeled-data settings. The underlying raw artifacts are confidential and are not available for public verification.
 
 | Ratio | Method | Best epoch | Val AP | Val AP50 | Val AP75 | Val APs | Test AP | Test AP50 | Test AP75 | Test APs | Δ Test AP vs Sup-only |
 |:---|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -203,19 +211,19 @@ Only sanitized code notebooks and this technical summary should be committed.
 
 ## Public Repository Policy
 
-Before committing the Semi-DETR material, verify that the notebooks do not contain embedded image outputs or base64 artifacts:
+Before committing the Semi-DETR material, run the automated public-safety audit:
 
 ```powershell
-Select-String -Path notebooks\semidetr\*.ipynb -Pattern '"image/png"', '"image/jpeg"', 'base64'
+python scripts\check_semidetr_public_safety.py
 ```
 
 Expected result:
 
 ```text
-No matches
+Semi-DETR public-safety audit passed: 7 notebooks
 ```
 
-Then check Git status:
+The audit rejects notebook outputs, attachments, embedded images, execution metadata, owner-specific Kaggle paths, data-source metadata, and credential-like assignments. Then check Git status:
 
 ```powershell
 git status
