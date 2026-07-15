@@ -95,7 +95,7 @@ There are two valid ways to reproduce the benchmark:
 2. Use the raw source archives and run the data preparation notebook:
 
 ```text
-notebooks/01_prepare_final_datapcb_clean_6cls.ipynb
+notebooks/01_prepare_final_datapcb_clean_6cls_sourcewise.ipynb
 ```
 
 The first option is recommended if the goal is to reproduce the model benchmark quickly. The second option is recommended if the goal is to inspect the dataset cleaning and merging process.

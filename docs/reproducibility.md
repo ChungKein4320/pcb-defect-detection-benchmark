@@ -48,6 +48,8 @@ Semi-DETR public-safety audit passed: 7 notebooks
 
 These commands do not train a model, download data, or require a GPU.
 
+GitHub Actions runs these offline checks on every push to `master` and every pull request using `.github/workflows/repository-checks.yml`. The local dataset integrity audit is intentionally excluded from CI because the image archive is not committed.
+
 ## Experiment Manifest
 
 The machine-readable historical manifest is:

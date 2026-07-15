@@ -1,5 +1,7 @@
 # PCB Defect Detection Benchmark
 
+[![Repository checks](https://github.com/ChungKein4320/pcb-defect-detection-benchmark/actions/workflows/repository-checks.yml/badge.svg)](https://github.com/ChungKein4320/pcb-defect-detection-benchmark/actions/workflows/repository-checks.yml)
+
 A source-wise benchmark for printed circuit board (PCB) defect detection using a cleaned 6-class merged dataset and multiple object detection families.
 
 This project focuses on building a reproducible PCB defect detection benchmark, comparing one-stage, two-stage, and transformer-based detectors, and analyzing model robustness across different PCB dataset sources.
@@ -324,6 +326,10 @@ This section is included as additional research context, not as part of the main
 ```text
 pcb-defect-detection-benchmark/
 │
+├── .github/
+│   └── workflows/
+│       └── repository-checks.yml
+│
 ├── configs/
 │   ├── data/
 │   └── experiments/
@@ -334,9 +340,11 @@ pcb-defect-detection-benchmark/
 │
 ├── docs/
 │   ├── benchmark_protocol.md
+│   ├── dataset_integrity.md
 │   ├── docs_data_sources.md
 │   ├── experiment_log.md
 │   ├── kaggle_links.md
+│   ├── release_notes_v0.1_benchmark.md
 │   ├── reproducibility.md
 │   └── semidetr_private_research_summary.md
 │
@@ -353,9 +361,13 @@ pcb-defect-detection-benchmark/
 ├── reports/
 │   ├── figures/
 │   ├── tables/
-│   └── benchmark_readme_summary.md
+│   ├── benchmark_readme_summary.md
+│   └── dataset_integrity_summary.json
 │
 ├── scripts/
+│   ├── audit_dataset_integrity.py
+│   ├── check_semidetr_public_safety.py
+│   └── validate_reproducibility.py
 ├── tests/
 │
 ├── .gitignore
@@ -396,6 +408,12 @@ python -m unittest discover -s tests -v
 ```
 
 These commands validate the committed experiment manifest, result provenance, timing arithmetic, Semi-DETR disclosure boundary, and regression tests without downloading data or using a GPU. See [`docs/reproducibility.md`](docs/reproducibility.md) for the exact scope and limitations.
+
+The same offline checks run automatically on GitHub for every push to `master` and every pull request. When the processed public dataset is available locally, also run the data-dependent integrity audit:
+
+```powershell
+python scripts\audit_dataset_integrity.py data\processed\DataPCB_Final_Clean_6cls
+```
 
 ### Kaggle Workflow
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import shutil
 import sys
 import tempfile
@@ -43,6 +44,29 @@ class DatasetIntegrityAuditTests(unittest.TestCase):
         self.assertEqual(report["cross_split"]["byte_identical_sha256_groups"], 0)
         self.assertEqual(report["within_split"]["byte_identical_sha256_groups"], 0)
         self.assertEqual(len(report["dataset_fingerprint_sha256"]), 64)
+
+    def test_committed_aggregate_report_is_consistent(self) -> None:
+        report = json.loads(
+            (ROOT / "reports" / "dataset_integrity_summary.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertEqual(report["status"], "passed")
+        self.assertEqual(report["errors"], [])
+        self.assertEqual(
+            {split: values["images"] for split, values in report["splits"].items()},
+            {"train": 6624, "valid": 937, "test": 1887},
+        )
+        self.assertTrue(
+            all(value == 0 for value in report["cross_split"].values())
+        )
+        self.assertTrue(
+            all(value == 0 for value in report["within_split"].values())
+        )
+        self.assertEqual(len(report["dataset_fingerprint_sha256"]), 64)
+        self.assertIn(
+            "absence of all possible data leakage", report["scope"]["not_claimed"]
+        )
 
     def test_byte_identical_cross_split_image_fails(self) -> None:
         train_image = next((self.temp_dir / "train" / "images").iterdir())
