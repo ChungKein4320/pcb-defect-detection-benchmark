@@ -47,7 +47,7 @@ class DatasetIntegrityAuditTests(unittest.TestCase):
 
     def test_committed_aggregate_report_is_consistent(self) -> None:
         report = json.loads(
-            (ROOT / "reports" / "dataset_integrity_summary.json").read_text(
+            (ROOT / "reports/public_benchmark/dataset_integrity_summary.json").read_text(
                 encoding="utf-8"
             )
         )

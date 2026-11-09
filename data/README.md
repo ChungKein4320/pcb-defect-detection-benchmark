@@ -1,90 +1,20 @@
-# Data
+# Local benchmark data
 
-This folder is used for local dataset storage only. Dataset files are not committed to GitHub.
-
-## Download
-
-Dataset archives are available from the Google Drive folder below:
-
-```text
-https://drive.google.com/drive/folders/1HgYeXju6ztRux0FNicaaQ8CKoi9qTl5g?usp=sharing
-```
-
-See the detailed data source guide:
-
-```text
-docs/docs_data_sources.md
-```
-
-## Included Archives
-
-The Google Drive folder contains four `.zip` files:
-
-```text
-DsPCBSD+.zip
-HRIPCB.zip
-DeepPCB.zip
-DataPCB_Final_Clean_6cls.zip
-```
-
-## Expected Local Structure
+Use the [six-class benchmark provenance guide](../docs/public_benchmark.md#dataset-and-provenance) to identify the source exports. The repository expects the following layout for local inspection and auditing.
 
 ```text
 data/
-├── raw/
-│   ├── archives/
-│   │   ├── DsPCBSD+.zip
-│   │   ├── HRIPCB.zip
-│   │   └── DeepPCB.zip
-│   └── datapcb-project/
-│       ├── DeepPCB/
-│       ├── DsPCBSD/
-│       └── HRIPCB/
-└── processed/
-    ├── archives/
-    │   └── DataPCB_Final_Clean_6cls.zip
-    └── DataPCB_Final_Clean_6cls/
-        ├── train/
-        ├── valid/
-        ├── test/
-        └── data.yaml
+├── raw/datapcb-project/
+│   ├── DeepPCB/
+│   ├── DsPCBSD/
+│   └── HRIPCB/
+└── processed/DataPCB_Final_Clean_6cls/
+    ├── train/{images,labels}/
+    ├── valid/{images,labels}/
+    ├── test/{images,labels}/
+    └── data.yaml
 ```
 
-## Folder Meaning
+Each raw source also follows the YOLO split layout. Use the [preparation notebook](../notebooks/public_benchmark/01_prepare_dataset.ipynb) with the three raw exports or audit an authorized copy of the prepared dataset. Historical Kaggle paths and taxonomy are recorded in the [Kaggle config reference](../configs/data/kaggle_datapcb_final_clean_6cls.yaml). The [local config reference](../configs/data/local_datapcb_final_clean_6cls.example.yaml) documents the expected local location. See the [rerun guide](../docs/reproducibility.md#audit-and-rerun-the-six-class-benchmark) for commands.
 
-```text
-data/raw/
-```
-
-Stores the original source datasets.
-
-```text
-data/processed/
-```
-
-Stores the final cleaned dataset used by the benchmark.
-
-The main benchmark dataset is:
-
-```text
-data/processed/DataPCB_Final_Clean_6cls/
-```
-
-## Git Policy
-
-The following folders are excluded from Git:
-
-```text
-data/raw/
-data/processed/
-```
-
-Only this `README.md` file is committed to document the expected data layout.
-
-## Training Environment
-
-Training is performed on Kaggle. Local data is used only for backup, inspection, and project organization.
-
-Full datasets, processed outputs, training runs, and weights are not committed to this repository.
-
-After extracting the processed dataset, run the aggregate integrity audit documented in `docs/dataset_integrity.md`. If the archive's `data.yaml` still contains a Kaggle-specific absolute `path`, use the local configuration template in `configs/data/local_datapcb_final_clean_6cls.example.yaml` or update that local, ignored file for the current environment.
+Keep the coursework dataset outside this tree. Its access requirements and separate protocol are described in the [DETR research guide](../docs/semi_supervised_research.md).

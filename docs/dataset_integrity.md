@@ -22,14 +22,14 @@ From the repository root:
 ```powershell
 python scripts\audit_dataset_integrity.py `
   data\processed\DataPCB_Final_Clean_6cls `
-  --output reports\dataset_integrity_summary.json
+  --output .local\public_dataset_audit.json
 ```
 
 The command exits with a non-zero status when it finds invalid files, invalid labels, missing pairs, repeated source identifiers, or byte-identical images crossing dataset splits.
 
 ## Audited Local Snapshot
 
-The committed `reports/dataset_integrity_summary.json` was generated from the local processed snapshot used by this project. It records:
+The [committed summary](../reports/public_benchmark/dataset_integrity_summary.json) was generated from the local processed snapshot used by this project. It records:
 
 - 6,624 train images and labels;
 - 937 validation images and labels;

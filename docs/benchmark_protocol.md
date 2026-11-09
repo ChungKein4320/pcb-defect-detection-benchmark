@@ -17,7 +17,7 @@ DsPCBSD test only
 HRIPCB test only
 ```
 
-The main ranking metric is `mAP50-95`. Precision, recall, F1, and `mAP50` provide supporting context. Source-wise evaluation uses the same model checkpoint and filters the merged test set by the source prefix added during dataset preparation.
+The main ranking metric is `mAP50-95`. Precision, recall, F1, and `mAP50` provide supporting context. Source-wise evaluation uses the same model checkpoint and filters the merged test set by the source prefix added during dataset preparation. Each source also contributes training images, so these are within-source holdouts.
 
 The evaluation backends are not identical: the Ultralytics models use the Ultralytics validator, while Faster R-CNN uses TorchMetrics/pycocotools plus a fixed-threshold precision/recall calculation. Both report COCO-style AP, but strict cross-framework ranking would be stronger with one shared evaluator over exported predictions. In particular, precision, recall, and F1 should not be treated as threshold-equivalent across the two backends.
 
@@ -35,7 +35,7 @@ All five recorded runs used a Kaggle environment with two Tesla T4 GPUs visible.
 | YOLOv11s-CBAMLite-BiFPNLite-P2 | 1,887 | 640 | 16 | CUDA 0 | Ultralytics `metrics.speed["inference"]` | 16.3764 | 61.0634 |
 | PCBNet-RTDETR-HybridOpt | 1,887 | 768 | 16 | CUDA 0,1 | Ultralytics `metrics.speed["inference"]` | 47.8226 | 20.9106 |
 
-These are the merged-test rows; the dataset-preparation notebook records 1,887 merged test images. The machine-readable version is stored in `reports/tables/historical_timing_context.csv`.
+These are the merged-test rows; the dataset-preparation notebook records 1,887 merged test images. The machine-readable version is stored in `reports/public_benchmark/tables/historical_timing_context.csv`.
 
 For the Ultralytics models, the CSV stores the framework-reported inference component. For Faster R-CNN, the manual timer includes device transfer, model forward, conversion of predictions/targets to CPU, and `torchmetrics.update`; it excludes the later `metric.compute` call. Therefore, the Faster R-CNN value is not scope-equivalent to the Ultralytics inference field.
 
@@ -76,4 +76,4 @@ New latency results should be published separately from the historical columns a
 
 ## Current Status
 
-The standardized latency protocol above has not yet been executed. Until it is, the README uses the label `Recorded FPS` and qualifies YOLOv11s as having the highest recorded throughput in the original notebook logs, not as a proven deployment-speed winner.
+The standardized latency protocol above has not yet been executed. The timing CSV preserves the original measurements for provenance.

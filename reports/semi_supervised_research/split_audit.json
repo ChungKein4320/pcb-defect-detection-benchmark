@@ -1,0 +1,26 @@
+{
+  "dataset": "historical_five_class_yolo_export",
+  "image_counts": {
+    "train": 2518,
+    "valid": 840,
+    "test": 838
+  },
+  "family_rule": "Strip the Roboflow export suffix and then a terminal _-<digits>- variant suffix.",
+  "cross_split": {
+    "train_valid": {
+      "byte_identical_groups": 0,
+      "shared_export_ids": 0,
+      "candidate_family_ids": 565
+    },
+    "train_test": {
+      "byte_identical_groups": 0,
+      "shared_export_ids": 0,
+      "candidate_family_ids": 587
+    },
+    "valid_test": {
+      "byte_identical_groups": 0,
+      "shared_export_ids": 0,
+      "candidate_family_ids": 276
+    }
+  }
+}

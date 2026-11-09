@@ -21,6 +21,7 @@ Thumbs.db
 # Data
 data/raw/
 data/processed/
+/.local/
 *.zip
 *.tar
 *.tar.gz
@@ -28,14 +29,17 @@ data/processed/
 
 # Model weights and checkpoints
 weights/
+weights_*/
 *.pt
 *.pth
 *.onnx
 *.engine
 *.ckpt
+*.safetensors
 
 # Training outputs
 runs/
+artifacts/
 wandb/
 mlruns/
 
@@ -46,6 +50,14 @@ kaggle/working/
 
 # Logs
 *.log
+*.cache
+
+# Credentials and per-machine settings
+.env
+.env.*
+!.env.example
+kaggle.json
+configs/data/*.local.yaml
 
 # Temporary inspection files
 project_structure_clean.txt

@@ -1,114 +1,67 @@
-# Reproducibility Guide
+# Reproducibility
 
-## What This Repository Can Reproduce
+Run commands from the repository root. Use Python 3.12 for the closest match to the historical benchmark. The offline checks also run in [GitHub Actions](../.github/workflows/repository-checks.yml).
 
-The public 6-class benchmark includes the data-preparation logic, training/evaluation notebooks, source-wise result tables, figures, and an auditable experiment manifest.
+## Inspect results on CPU
 
-There are two different reproducibility levels:
-
-- **Offline artifact validation:** available without a GPU or dataset. It checks experiment configuration, committed result provenance, timing arithmetic, required dependencies, and documentation links.
-- **Local dataset integrity audit:** requires the processed public dataset and checks image/label validity plus exact cross-split identity indicators.
-- **Training/evaluation rerun:** requires the public-source PCB datasets, the processed dataset layout, Kaggle or equivalent GPU resources, and model downloads.
-
-The separate confidential-data Semi-DETR study is code-auditable but not publicly data-reproducible. See `docs/semidetr_private_research_summary.md`.
-
-## Historical Environment Evidence
-
-The following core versions are preserved in executed notebook output or explicit notebook setup code:
-
-| Component | Recorded version | Evidence status |
-|---|---|---|
-| Python | 3.12.12 | Ultralytics run output |
-| PyTorch | 2.10.0+cu128 | notebook output |
-| Torchvision | 0.25.0+cu128 | Faster R-CNN notebook output |
-| Ultralytics | 8.4.30 | Ultralytics run output |
-| Transformers | 4.40.2 | Semi-DETR setup code |
-| GPU | 2× Tesla T4 visible | notebook output |
-
-`requirements.txt` pins the four core Python package versions above where a normal PyPI version is meaningful. The CUDA build suffix depends on the PyTorch wheel index and host driver, so install the appropriate PyTorch build for the target machine. Packages whose historical versions were not recorded remain unpinned rather than being guessed.
-
-This is a partial historical pin, not a full lockfile.
-
-## Offline Validation
-
-From the repository root:
-
-```powershell
-python scripts\validate_reproducibility.py
-python scripts\check_semidetr_public_safety.py
+```sh
+python -m pip install Pillow
 python -m unittest discover -s tests -v
+python scripts/validate_reproducibility.py
+python scripts/check_semidetr_public_safety.py
 ```
 
-Expected output includes:
+The validators compare the benchmark manifest to the model CSVs and check the public research notebook outputs. The tests include synthetic dataset integrity checks.
 
-```text
-Reproducibility validation passed: 5 experiments, 4 sources
-Semi-DETR public-safety audit passed: 7 notebooks
+Install the notebook tools separately from the training packages.
+
+```sh
+python -m pip install jupyterlab pandas matplotlib
+python -m jupyterlab
 ```
 
-These commands do not train a model, download data, or require a GPU.
+- [Six-class comparison](../notebooks/public_benchmark/07_compare_results.ipynb) reads the manifest's five pairs of result files and writes regenerated artifacts under `.local/public_benchmark/`.
+- [Historical DETR results](../notebooks/semi_supervised_research/06_historical_results_and_analysis.ipynb) contains a saved test AP figure and a text table for GitHub viewing without a kernel, GPU access, or coursework files.
 
-GitHub Actions runs these offline checks on every push to `master` and every pull request using `.github/workflows/repository-checks.yml`. The local dataset integrity audit is intentionally excluded from CI because the image archive is not committed.
+To regenerate a comparison preview from the `test_AP` column of the historical results CSV, run the following command with Matplotlib installed. It writes `.local/historical_test_ap.png`. The safety check pins the reviewed public PNG and allows only that image as a saved DETR notebook output.
 
-## Experiment Manifest
-
-The machine-readable historical manifest is:
-
-```text
-configs/experiments/public_benchmark.json
+```sh
+python scripts/plot_semidetr_evidence.py
 ```
 
-It records the five experiment IDs, notebook paths, result files, model families, image sizes, epochs, batch sizes, devices, seeds, evaluator backends, dataset classes, and historical core environment evidence.
+## Audit and rerun the six-class benchmark
 
-The manifest was extracted from the executed notebooks and committed result files. It is an audit and validation surface; the current notebooks do not automatically consume it as a training configuration. This limitation is stated explicitly to avoid overstating reproducibility.
+Get the three historical YOLO exports or an authorized prepared copy. Run the audit and save the report under `.local/`. See the [dataset provenance and class mapping](public_benchmark.md) and [local data layout](../data/README.md).
 
-## Dataset Setup
-
-Use the source and preprocessing documentation in `docs/docs_data_sources.md`. For local layout, start from:
-
-```text
-configs/data/local_datapcb_final_clean_6cls.example.yaml
+```sh
+python scripts/audit_dataset_integrity.py data/processed/DataPCB_Final_Clean_6cls --output .local/public_dataset_audit.json
 ```
 
-Expected processed structure:
+To rebuild locally, run [01 · Prepare the dataset](../notebooks/public_benchmark/01_prepare_dataset.ipynb) with JupyterLab, pandas, matplotlib, Pillow, and PyYAML installed. From within the repository it reads `data/raw/datapcb-project/` and writes to `.local/datapcb_final_clean_6cls/` by default. Set `PCB_BENCHMARK_RAW_ROOT` and `PCB_BENCHMARK_PREP_ROOT` for a different input or output location. Use a dedicated preparation directory because the notebook rebuilds its generated subdirectories on each run.
 
-```text
-data/processed/DataPCB_Final_Clean_6cls/
-├── train/images
-├── train/labels
-├── valid/images
-├── valid/labels
-├── test/images
-├── test/labels
-└── data.yaml
-```
+For a GPU rerun, use a Kaggle notebook with the required data attached and a writable `/kaggle/working`. Check the path cell in [01 · Prepare the dataset](../notebooks/public_benchmark/01_prepare_dataset.ipynb) and in the chosen [training notebook](public_benchmark.md#detector-configurations). Point the preparation cell to the directory containing the three exports. Attach the prepared dataset for training and add its mount to the notebook's candidate paths. Check that the model's device and batch settings match the hardware before running. Use a fresh working directory so cached datasets and results from another run cannot be mistaken for the intended snapshot.
 
-The committed preparation notebook reports 6,624 training images, 937 validation images, and 1,887 test images.
+The historical runs used Python 3.12.12, PyTorch 2.10.0+cu128, Torchvision 0.25.0+cu128 for Faster R-CNN, and Ultralytics 8.4.30. Two Tesla T4s were visible. Per-model settings and timing scopes are in the [manifest](../configs/experiments/public_benchmark.json) and [protocol](benchmark_protocol.md). The manifest records settings for inspection. The training notebooks use their own config cells.
 
-After preparing or extracting the dataset, run:
+Preserve any new run's configuration, dependency versions, evaluation backend, checkpoint selection, and data audit separately. The comparison notebook defaults to the committed historical inputs. To compare a new run, work on a separate copy and set the manifest entries to the new CSVs.
+
+## Set up the five-class DETR dataset
+
+Open the DetectionProjects project in Roboflow Universe, select dataset version 1, and download a YOLOv8 bounding-box export if available to your account. Extract it locally. Check that `data.yaml` defines class IDs `0`–`4` and that `train/`, `valid/`, and `test/` each contain `images/` and `labels/`. The historical split sizes were 2,518, 840, and 838. The six-class benchmark uses separate source exports and configuration. [Roboflow Universe listing](https://universe.roboflow.com/detectionprojects-3nwgx/electronic_component_failure) · [Dataset provenance and attribution](semi_supervised_research.md#access-attribution-and-verification)
+
+In an authorized GPU environment, install the appropriate PyTorch/Torchvision build and the packages in [requirements.txt](../requirements.txt). Set `PCB_SEMIDETR_DATA_ROOT` to the extracted dataset root and `PCB_SEMIDETR_OUTPUT_ROOT` to a private writable directory before starting Jupyter. Run the selected sanitized 10% recipe from the [implementation list](semi_supervised_research.md#read-the-implementation).
+
+Exact reproduction of the saved scores remains unverified. Historical checkpoints, exact split manifests, and the complete training environment are outside the release. The historical setup cell requests Transformers 4.40.2 if absent. The installed version and complete dependency lock were not captured.
+
+## Verify the historical DETR runs
+
+Set `PCB_COURSEWORK_ROOT` to the local coursework folder containing `notebooks/` and `data/YOLO_format/`. The verification script reads the originals and compares ten results and the split audit to the repository. The optional flag exports selected numeric histories.
 
 ```powershell
-python scripts\audit_dataset_integrity.py `
-  data\processed\DataPCB_Final_Clean_6cls `
-  --output reports\dataset_integrity_summary.json
+python scripts/audit_semidetr_evidence.py "$env:PCB_COURSEWORK_ROOT" --export-history
+python scripts/plot_semidetr_evidence.py --local-history
 ```
 
-See `docs/dataset_integrity.md` for the exact checks, audited aggregate result, and limitations.
+The export writes 150 loss rows and 30 validation measurements per run to the ignored `.local/semidetr_epoch_metrics.csv`. The local chart in `.local/historical_validation_ap.png` plots the saved observations without smoothing. It shows late plateaus at both label budgets and marks the target-duplication window for the three SHM recipes. The trajectories reflect each recipe's full schedule and objective. Total losses combine different terms across recipes and are kept as numeric diagnostics. The epoch-level files require coursework disclosure clearance before release.
 
-## Recommended Execution Order
-
-1. Run `notebooks/01_prepare_final_datapcb_clean_6cls_sourcewise.ipynb` or use the documented processed archive.
-2. Run one or more model notebooks `02` through `06`.
-3. Preserve each notebook's source-wise CSV outputs.
-4. Run `notebooks/07_compare_sourcewise_benchmark_results.ipynb` to consolidate reports.
-5. Run the offline validation commands above before committing regenerated artifacts.
-
-## Known Boundaries
-
-- Heavy training was originally performed on Kaggle and has not been rerun locally end-to-end.
-- Model weights are intentionally excluded from Git.
-- The public benchmark uses two evaluator implementations; see `docs/benchmark_protocol.md`.
-- Historical FPS values are not a standardized latency benchmark.
-- The experiment manifest validates recorded settings but does not yet drive the notebooks.
-- The exact-identity dataset audit cannot rule out same-board, near-duplicate, or same-template overlap.
-- Full bit-for-bit environment recreation is not possible because a complete historical package lock was not captured.
+Use the original artifacts to verify historical runs. The sanitized implementations preserve the training logic, use configurable data and output paths, and have had their credential assignment removed. See the [DETR research guide](semi_supervised_research.md) for selection and split limitations.

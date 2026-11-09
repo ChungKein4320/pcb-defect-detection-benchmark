@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import math
 import re
 from pathlib import Path
 from typing import Any
@@ -12,6 +13,7 @@ from typing import Any
 
 MANIFEST_PATH = Path("configs/experiments/public_benchmark.json")
 REQUIRED_SOURCES = {"Merged", "DeepPCB", "DsPCBSD", "HRIPCB"}
+SCORE_COLUMNS = ("precision", "recall", "f1", "mAP50", "mAP50_95")
 REQUIRED_DEPENDENCIES = {
     "albumentations",
     "ipython",
@@ -84,6 +86,14 @@ def validate_manifest(root: Path, manifest: dict[str, Any]) -> list[str]:
         errors.append("dataset test_images must match the committed 1,887-image test set")
     if set(dataset.get("test_sources", [])) != REQUIRED_SOURCES:
         errors.append("dataset test_sources do not match the source-wise benchmark")
+    integrity_path = _repo_file(root, dataset.get("integrity_report", ""))
+    if integrity_path is None:
+        errors.append("dataset integrity report is missing")
+    else:
+        splits = json.loads(integrity_path.read_text(encoding="utf-8"))["splits"]
+        for split, count_key in (("train", "train_images"), ("valid", "validation_images"), ("test", "test_images")):
+            if splits[split]["images"] != dataset.get(count_key):
+                errors.append(f"dataset {count_key} does not match the integrity report")
 
     experiments = manifest.get("experiments", [])
     if len(experiments) != 5:
@@ -111,6 +121,7 @@ def validate_manifest(root: Path, manifest: dict[str, Any]) -> list[str]:
         "seed",
         "evaluator",
     }
+    results_by_model = {}
     for item in experiments:
         label = item.get("id", "<missing-id>")
         missing = sorted(required_fields - set(item))
@@ -129,26 +140,54 @@ def validate_manifest(root: Path, manifest: dict[str, Any]) -> list[str]:
         results_path = _repo_file(root, item["results_file"])
         if results_path is not None:
             rows = _read_csv(results_path)
-            if {row.get("test_source") for row in rows} != REQUIRED_SOURCES:
+            if len(rows) != len(REQUIRED_SOURCES) or {row.get("test_source") for row in rows} != REQUIRED_SOURCES:
                 errors.append(f"{label}: result sources do not match {sorted(REQUIRED_SOURCES)}")
             if {row.get("experiment") for row in rows} != {item["id"]}:
                 errors.append(f"{label}: result experiment id mismatch")
             if {row.get("model_name") for row in rows} != {item["model_name"]}:
                 errors.append(f"{label}: result model_name mismatch")
+            results_by_model[item["display_name"]] = {row["test_source"]: row for row in rows}
 
     evaluation = manifest.get("evaluation", {})
-    comparison_path = root / evaluation.get("comparison_table", "")
-    timing_path = root / evaluation.get("timing_context", "")
-    if not comparison_path.is_file():
+    comparison_path = _repo_file(root, evaluation.get("comparison_table", ""))
+    timing_path = _repo_file(root, evaluation.get("timing_context", ""))
+    source_path = _repo_file(root, evaluation.get("source_comparison_table", ""))
+    if comparison_path is None:
         errors.append("comparison table is missing")
-    if not timing_path.is_file():
+    if timing_path is None:
         errors.append("historical timing context is missing")
-    if comparison_path.is_file() and timing_path.is_file():
-        comparison = {row["model_display_name"]: row for row in _read_csv(comparison_path)}
-        timing = {row["model_display_name"]: row for row in _read_csv(timing_path)}
-        expected = set(display_names)
-        if set(comparison) != expected or set(timing) != expected:
-            errors.append("manifest/comparison/timing model sets differ")
+    if source_path is None:
+        errors.append("source comparison table is missing")
+    expected = set(display_names)
+    reports = {}
+    for name, path in (("merged", comparison_path), ("timing", timing_path), ("source-wise", source_path)):
+        if path is None:
+            continue
+        rows = _read_csv(path)
+        table = {row["model_display_name"]: row for row in rows}
+        if len(rows) != len(expected) or set(table) != expected:
+            errors.append(f"{name} table does not list one row per model")
+        reports[name] = table
+
+    for name, rows in results_by_model.items():
+        merged = reports.get("merged", {}).get(name)
+        source_comparison = reports.get("source-wise", {}).get(name)
+        try:
+            if merged and any(
+                not math.isclose(float(merged[key]), float(rows["Merged"][key]), rel_tol=0, abs_tol=1e-12)
+                for key in (*SCORE_COLUMNS, "inference_ms_per_image", "FPS")
+            ):
+                errors.append(f"{name}: merged results do not match the model CSV")
+            if source_comparison and any(
+                not math.isclose(float(source_comparison[source]), float(rows[source]["mAP50_95"]), rel_tol=0, abs_tol=1e-12)
+                for source in REQUIRED_SOURCES
+            ):
+                errors.append(f"{name}: source-wise results do not match the model CSV")
+        except (KeyError, ValueError) as exc:
+            errors.append(f"{name}: missing or invalid result field: {exc}")
+
+    if comparison_path is not None and timing_path is not None:
+        comparison, timing = reports["merged"], reports["timing"]
         for name in set(comparison) & set(timing):
             try:
                 result_ms = float(comparison[name]["inference_ms_per_image"])
@@ -158,9 +197,11 @@ def validate_manifest(root: Path, manifest: dict[str, Any]) -> list[str]:
             except (KeyError, ValueError) as exc:
                 errors.append(f"{name}: invalid timing value: {exc}")
                 continue
-            if abs(result_ms - timing_ms) > 1e-12 or abs(result_fps - timing_fps) > 1e-12:
+            if not math.isclose(result_ms, timing_ms, rel_tol=0, abs_tol=1e-12) or not math.isclose(
+                result_fps, timing_fps, rel_tol=0, abs_tol=1e-12
+            ):
                 errors.append(f"{name}: timing context does not match comparison table")
-            if abs(timing_fps - 1000.0 / timing_ms) > 1e-10:
+            if timing_ms <= 0 or not math.isclose(timing_fps, 1000.0 / timing_ms, rel_tol=0, abs_tol=1e-10):
                 errors.append(f"{name}: recorded FPS formula is inconsistent")
 
     return errors
@@ -191,15 +232,13 @@ def validate_repository(root: Path) -> list[str]:
 
     required_docs = (
         "docs/benchmark_protocol.md",
-        "docs/docs_data_sources.md",
+        "docs/public_benchmark.md",
+        "docs/semi_supervised_research.md",
         "docs/reproducibility.md",
     )
     for relative in required_docs:
         if not (root / relative).is_file():
             errors.append(f"missing documentation: {relative}")
-    data_readme = root / "data/README.md"
-    if data_readme.is_file() and "docs/data_sources.md" in data_readme.read_text(encoding="utf-8"):
-        errors.append("data/README.md still references the old data-source guide path")
     return errors
 
 

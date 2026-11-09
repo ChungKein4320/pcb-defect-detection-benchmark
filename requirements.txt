@@ -1,8 +1,10 @@
-# Core versions recorded by the executed benchmark notebooks.
+# Core versions reported by the six-class benchmark notebooks.
 # Install the PyTorch build that matches the host CUDA/driver stack.
 torch==2.10.0
 torchvision==0.25.0
 ultralytics==8.4.30
+
+# Version requested by the historical coursework setup cell.
 transformers==4.40.2
 
 # Historical versions for these packages were not captured; do not pretend this
