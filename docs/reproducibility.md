@@ -11,7 +11,7 @@ python scripts/validate_reproducibility.py
 python scripts/check_semidetr_public_safety.py
 ```
 
-The validators compare the benchmark manifest to the model CSVs and check the public research notebook outputs. The tests include synthetic dataset integrity checks.
+The validators compare the benchmark manifest to the model CSVs and check saved notebook outputs against the reviewed figure allowlist. The tests include synthetic dataset integrity checks.
 
 Install the notebook tools separately from the training packages.
 
@@ -20,10 +20,10 @@ python -m pip install jupyterlab pandas matplotlib
 python -m jupyterlab
 ```
 
-- [Six-class comparison](../notebooks/public_benchmark/07_compare_results.ipynb) reads the manifest's five pairs of result files and writes regenerated artifacts under `.local/public_benchmark/`.
+- [Six-class comparison](../notebooks/public_benchmark/07_compare_results.ipynb) shows the saved merged and source-wise comparison figures. Its executable cells read the manifest's five pairs of result files and write regenerated artifacts under `.local/public_benchmark/`.
 - [Historical DETR results](../notebooks/semi_supervised_research/06_historical_results_and_analysis.ipynb) contains a saved test AP figure and a text table for GitHub viewing without a kernel, GPU access, or coursework files.
 
-To regenerate a comparison preview from the `test_AP` column of the historical results CSV, run the following command with Matplotlib installed. It writes `.local/historical_test_ap.png`. The safety check pins the reviewed public PNG and allows only that image as a saved DETR notebook output.
+To regenerate a comparison preview from the `test_AP` column of the historical results CSV, run the following command with Matplotlib installed. It writes `.local/historical_test_ap.png`. The safety check pins the reviewed public PNG and allows only that image as a saved DETR notebook output. It also pins the original Kaggle plots displayed in the benchmark archive sections.
 
 ```sh
 python scripts/plot_semidetr_evidence.py

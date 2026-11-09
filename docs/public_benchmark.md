@@ -25,7 +25,7 @@ The export metadata lists CC BY 4.0 for all three exports. The DsPCBSD+ upstream
 | [Custom YOLOv11s](../notebooks/public_benchmark/05_train_custom_yolo11s.ipynb) | Tests lightweight attention, feature fusion and a high-resolution P2 head for small defects |
 | [RT-DETR-L HybridOpt](../notebooks/public_benchmark/06_train_rtdetr_hybridopt.ipynb) | Uses the stock RT-DETR-L architecture with a different training recipe, including 768 px inputs and AdamW with cosine scheduling |
 
-The training code and configuration cells preserve the historical Kaggle recipes. Large outputs, including prediction grids, were removed from the active notebooks. The [experiment manifest](../configs/experiments/public_benchmark.json) maps each recipe to the corresponding source-wise evaluation CSV.
+The training code and configuration cells preserve the historical Kaggle recipes. The archive section in each notebook pairs a verified evaluation summary with the original loss and validation figure. Raw logs and prediction grids stay outside these sections. The [experiment manifest](../configs/experiments/public_benchmark.json) maps each recipe to the corresponding source-wise evaluation CSV.
 
 ## Results and error analysis
 
