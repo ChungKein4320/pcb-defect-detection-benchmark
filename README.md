@@ -10,11 +10,17 @@ The supervised baseline fine-tunes Deformable DETR on 5% or 10% of the training 
 
 The recipes adapt three ideas from Semi-DETR. **SHM** duplicates pseudo-targets within the existing one-to-one matcher. **CQC** matches predictions and penalizes class and box disagreement as a proxy for the paper's decoder-level consistency. **CPM** uses assignment costs and a Gaussian mixture with a quantile fallback to filter the boxes used for consistency. [Semi-DETR (CVPR 2023)](https://arxiv.org/abs/2307.08095)
 
-![Historical test AP for five Deformable DETR recipes at 5% and 10% labeling. SHM led at 5%, and SHM with CQC and CPM led at 10%.](reports/semi_supervised_research/figures/historical_test_ap.png)
+| Training recipe | Test AP50–95 at 5% labeled | Test AP50–95 at 10% labeled |
+| --- | ---: | ---: |
+| Supervised Deformable DETR | 0.5422 | 0.6007 |
+| Vanilla DETR-SSOD | 0.5383 | 0.6116 |
+| SHM approximation | 0.5621 | 0.6151 |
+| SHM + CQC proxy | 0.5545 | 0.6191 |
+| SHM + CQC + CPM | 0.5439 | 0.6211 |
 
-The chart replots saved test scores on the five-class coursework split (2,518 train, 840 validation, 838 test). SHM led at 5% labeling, where vanilla SSOD trailed the supervised baseline. SHM + CQC + CPM led at 10%. Each recipe used one seed. Changes in pseudo-label generation and sampling limit attribution to individual components, and a filename audit flagged possible train/test image-family overlap.
+The table reports historical test scores on the five-class coursework split (2,518 train, 840 validation, 838 test). SHM led at 5% labeling, where vanilla SSOD trailed the supervised baseline. SHM + CQC + CPM led at 10%. Each recipe used one seed. Changes in pseudo-label generation and sampling limit attribution to individual components, and a filename audit flagged possible train/test image-family overlap.
 
-[Results and visual analysis](notebooks/semi_supervised_research/06_historical_results_and_analysis.ipynb) · [Training implementations](docs/semi_supervised_research.md#read-the-implementation) · [Evidence provenance and limitations](docs/semi_supervised_research.md#evidence-and-interpretation) · [Reproduction and local verification](docs/reproducibility.md)
+[Results and analysis](notebooks/semi_supervised_research/06_historical_results_and_analysis.ipynb) · [Training implementations](docs/semi_supervised_research.md#read-the-implementation) · [Evidence provenance and limitations](docs/semi_supervised_research.md#evidence-and-interpretation) · [Reproduction and local verification](docs/reproducibility.md)
 
 ## Public Six-Class Detection Benchmark
 
@@ -31,6 +37,10 @@ The benchmark standardizes DeepPCB, DsPCBSD+, and HRIPCB into one taxonomy. The 
 RT-DETR-L led the merged test and all three source subsets. Those subsets come from sources represented in training. The custom YOLO recipe moved merged AP by just 0.0003, and HybridOpt scored below stock RT-DETR-L. Spur had the lowest average AP across the five detectors.
 
 See the [benchmark guide and notebooks](docs/public_benchmark.md), [merged results](reports/public_benchmark/tables/model_comparison_merged_test.csv), [source breakdown](reports/public_benchmark/tables/model_comparison_sourcewise_pivot.csv), and [evaluation protocol](docs/benchmark_protocol.md). The protocol explains the evaluator and timing differences.
+
+## Historical Experiments and Notebook Outputs
+
+The original experiments ran on Kaggle and in the coursework research environment. The public training notebooks are sanitized, with saved execution outputs removed for publication safety. The reported metrics were extracted and checked against saved outputs from the original notebooks. Intact copies are kept in a private local archive for local review only. Full independent reproduction through a new training or inference run remains unverified.
 
 ## Inspect and reproduce
 

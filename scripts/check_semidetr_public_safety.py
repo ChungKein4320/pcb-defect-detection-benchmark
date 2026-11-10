@@ -11,23 +11,20 @@ import re
 from pathlib import Path
 
 if __package__:
-    from .audit_semidetr_evidence import EXPERIMENTS, REPORTS, RESULTS, ROOT
+    from .audit_semidetr_evidence import EXPERIMENTS, RESULTS, ROOT
 else:
-    from audit_semidetr_evidence import EXPERIMENTS, REPORTS, RESULTS, ROOT
+    from audit_semidetr_evidence import EXPERIMENTS, RESULTS, ROOT
 
 EVIDENCE_NOTEBOOK = "06_historical_results_and_analysis.ipynb"
-TEST_AP_FIGURE = REPORTS / "figures" / "historical_test_ap.png"
-# Review the regenerated chart before changing this allowlist. Epoch-level figures stay local.
-TEST_AP_FIGURE_SHA256 = "6dae89436fb1b3c678cb853fe2c250ac7dda7e98e308d056dde4b3917f880fc0"
 ARCHIVE_FIGURE_SOURCE = "# Display-only historical figures. See the source references above."
-# Exact SHA-256 fingerprints of the reviewed PNG outputs from the public Kaggle archive at 4f3eb23.
+# Only the comparison notebook may show the reviewed original Kaggle figures from 4f3eb23.
 BENCHMARK_ARCHIVES = {
     "01_prepare_dataset.ipynb": (),
-    "02_train_yolo11s.ipynb": ("2e94210d3012fe23ee064c43eab3ece5e0ae7a5c309047916315663b7883dd81",),
-    "03_train_rtdetr_l.ipynb": ("d8551cfe4af86871919a83afd9fb602397d8b63bfbea21548419584c03609369",),
-    "04_train_faster_rcnn.ipynb": ("fc7817d092c5c782632322635582605a54041e0f3b7e9665d810e01bed18d29c",),
-    "05_train_custom_yolo11s.ipynb": ("b8ae79a2cacf263769d0066a30dad57d5e38aab59af6a93e3bce78147fc9b472",),
-    "06_train_rtdetr_hybridopt.ipynb": ("7b6db8a2b37557aa62aa02f15047c47bcc8bbae5fcf674c57cddce28d5700fbf",),
+    "02_train_yolo11s.ipynb": (),
+    "03_train_rtdetr_l.ipynb": (),
+    "04_train_faster_rcnn.ipynb": (),
+    "05_train_custom_yolo11s.ipynb": (),
+    "06_train_rtdetr_hybridopt.ipynb": (),
     "07_compare_results.ipynb": (
         "8b54baef9ed46561a07ea088cdd93b399fa6073564cdf76c054857a119788555",
         "eaddca5ba410be6ae7a65719b3f35ae68489751bf61714de39e2d8d34d91c7f8",
@@ -61,9 +58,7 @@ def png_fingerprints(outputs: list[dict]) -> tuple[str, ...] | None:
     return tuple(hashes)
 
 
-def audit_notebook(
-    path: Path, approved_png: bytes, *, benchmark_figures: tuple[str, ...] | None = None,
-) -> list[str]:
+def audit_notebook(path: Path, *, benchmark_figures: tuple[str, ...] | None = None) -> list[str]:
     errors: list[str] = []
     try:
         raw_text = path.read_text(encoding="utf-8")
@@ -74,8 +69,6 @@ def audit_notebook(
     if set(notebook.get("metadata", {})) - {"kernelspec", "language_info"}:
         errors.append(f"{path.name}: unexpected notebook metadata")
     benchmark = benchmark_figures is not None
-    is_evidence = not benchmark and path.name == EVIDENCE_NOTEBOOK
-    evidence_cells = 0
     archive_sections = 0
     archive_figures = 0
     cells = notebook.get("cells", [])
@@ -93,11 +86,7 @@ def audit_notebook(
             archive_sections += 1
             if cell.get("cell_type") != "markdown" or not source.startswith("## Archived Historical Execution Evidence\n"):
                 errors.append(f"{location} must be labeled historical evidence")
-        if is_evidence and cell_id == "historical-test-ap":
-            evidence_cells += 1
-            if png_fingerprints(cell.get("outputs", [])) != (hashlib.sha256(approved_png).hexdigest(),):
-                errors.append(f"{location} must contain only the approved historical test AP figure")
-        elif benchmark and cell_id == "historical-figures":
+        if benchmark and cell_id == "historical-figures":
             archive_figures += 1
             if (
                 not benchmark_figures
@@ -113,11 +102,25 @@ def audit_notebook(
 
     if benchmark and (archive_sections != 1 or archive_figures != int(bool(benchmark_figures))):
         errors.append(f"{path.name}: missing or duplicate historical evidence section")
-    if is_evidence and evidence_cells != 1:
-        errors.append(f"{path.name}: expected one historical test AP figure cell")
-    if not benchmark and not is_evidence and "PCB_SEMIDETR_DATA_ROOT" not in raw_text:
+    if not benchmark and path.name != EVIDENCE_NOTEBOOK and "PCB_SEMIDETR_DATA_ROOT" not in raw_text:
         errors.append(f"{path.name}: dataset configuration is missing")
     return errors
+
+
+def matches_test_ap_table(markdown: str, rows: list[dict[str, str]]) -> bool:
+    """Compare the five displayed methods and both label budgets with the results CSV."""
+    scores = {(row["labeled_percent"], row["method"]): row["test_AP"] for row in rows}
+    expected = [
+        (method, scores["5", method], scores["10", method])
+        for _, method, _ in EXPERIMENTS
+    ]
+    displayed = [
+        (re.sub(r"^\[([^\]]+)\]\([^)]+\)$", r"\1", method), at_5, at_10)
+        for method, at_5, at_10 in re.findall(
+            r"^\| ([^|\n]+) \| (\d\.\d{4}) \| (\d\.\d{4}) \|$", markdown, re.MULTILINE,
+        )
+    ]
+    return displayed == expected
 
 
 def main() -> int:
@@ -157,22 +160,21 @@ def main() -> int:
             print("Historical results contain invalid run metadata.")
             return 1
 
-    if not TEST_AP_FIGURE.is_file():
-        print("Approved historical test AP figure is missing.")
-        return 1
-    approved_png = TEST_AP_FIGURE.read_bytes()
-    if hashlib.sha256(approved_png).hexdigest() != TEST_AP_FIGURE_SHA256:
-        print("Historical test AP figure differs from the reviewed PNG.")
-        return 1
-
-    errors = [error for path in notebooks for error in audit_notebook(path, approved_png)]
+    errors = [error for path in notebooks for error in audit_notebook(path)]
     for name, path in benchmark_notebooks.items():
-        errors.extend(audit_notebook(path, approved_png, benchmark_figures=BENCHMARK_ARCHIVES[name]))
+        errors.extend(audit_notebook(path, benchmark_figures=BENCHMARK_ARCHIVES[name]))
     if errors:
         print("Notebook public-safety audit failed:")
         for error in errors:
             print(f"- {error}")
         return 1
+
+    analysis = json.loads((args.notebook_dir / EVIDENCE_NOTEBOOK).read_text(encoding="utf-8"))
+    markdown = "\n".join("".join(cell["source"]) for cell in analysis["cells"] if cell["cell_type"] == "markdown")
+    for label, text in (("README", (ROOT / "README.md").read_text(encoding="utf-8")), (EVIDENCE_NOTEBOOK, markdown)):
+        if not matches_test_ap_table(text, rows):
+            print(f"{label}: test AP table differs from the historical results CSV.")
+            return 1
 
     print(f"Notebook public-safety audit passed: {len(notebooks) + len(benchmark_notebooks)} notebooks")
     return 0

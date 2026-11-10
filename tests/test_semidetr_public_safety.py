@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+import csv
 import hashlib
 import json
 import sys
@@ -12,34 +13,45 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from scripts.check_semidetr_public_safety import ARCHIVE_FIGURE_SOURCE, EVIDENCE_NOTEBOOK, audit_notebook
+from scripts.check_semidetr_public_safety import (
+    ARCHIVE_FIGURE_SOURCE,
+    EVIDENCE_NOTEBOOK,
+    RESULTS,
+    audit_notebook,
+    matches_test_ap_table,
+)
 
 
 class SemiDetrDisclosureTests(unittest.TestCase):
-    def audit(self, name: str, cells: list[dict], approved_png: bytes = b"", **options) -> list[str]:
+    def audit(self, name: str, cells: list[dict], **options) -> list[str]:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / name
             path.write_text(json.dumps({"cells": cells}), encoding="utf-8")
-            return audit_notebook(path, approved_png, **options)
+            return audit_notebook(path, **options)
 
-    def test_evidence_output_must_match_the_allowlisted_png(self) -> None:
-        approved_png = b"example approved asset"
+    def test_detr_analysis_rejects_saved_outputs(self) -> None:
         cell = {
             "id": "historical-test-ap",
             "source": [],
+            "outputs": [],
+        }
+        self.assertEqual(self.audit(EVIDENCE_NOTEBOOK, [cell]), [])
+        cell.update({
             "outputs": [{
                 "output_type": "display_data",
-                "data": {"image/png": base64.b64encode(approved_png).decode("ascii")},
+                "data": {"image/png": base64.b64encode(b"previous DETR figure").decode("ascii")},
                 "metadata": {},
             }],
-        }
-        self.assertEqual(self.audit(EVIDENCE_NOTEBOOK, [cell], approved_png), [])
-        errors = self.audit(EVIDENCE_NOTEBOOK, [cell], b"other asset")
-        self.assertTrue(any("approved historical test AP figure" in error for error in errors))
+        })
+        errors = self.audit(EVIDENCE_NOTEBOOK, [cell])
+        self.assertTrue(any("execution record" in error for error in errors))
 
-        cell["outputs"][0]["data"]["text/plain"] = "Additional output"
-        errors = self.audit(EVIDENCE_NOTEBOOK, [cell], approved_png)
-        self.assertTrue(any("approved historical test AP figure" in error for error in errors))
+    def test_detr_table_rejects_a_changed_score(self) -> None:
+        with RESULTS.open(encoding="utf-8", newline="") as handle:
+            rows = list(csv.DictReader(handle))
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        self.assertTrue(matches_test_ap_table(readme, rows))
+        self.assertFalse(matches_test_ap_table(readme.replace("0.5422", "0.5423"), rows))
 
     def test_training_output_and_credential_assignment_are_rejected(self) -> None:
         cell = {
@@ -51,7 +63,7 @@ class SemiDetrDisclosureTests(unittest.TestCase):
         self.assertTrue(any("execution record" in error for error in errors))
 
     def test_kaggle_archive_requires_reviewed_png_and_display_only_cell(self) -> None:
-        name = "02_train_yolo11s.ipynb"
+        name = "07_compare_results.ipynb"
         png = b"reviewed Kaggle figure"
         archive = {
             "id": "historical-evidence",
@@ -81,6 +93,8 @@ class SemiDetrDisclosureTests(unittest.TestCase):
                 self.assertTrue(any("display-only cell" in error for error in errors))
         errors = self.audit(name, [archive, figure], benchmark_figures=("0" * 64,))
         self.assertTrue(any("approved archived PNGs" in error for error in errors))
+        errors = self.audit("02_train_yolo11s.ipynb", [archive, figure], benchmark_figures=())
+        self.assertTrue(any("display-only cell" in error for error in errors))
         archive["source"] += '\nOutput path: /kaggle/input/example'
         errors = self.audit(name, [archive, figure], benchmark_figures=allowed)
         self.assertTrue(any("local path" in error for error in errors))
